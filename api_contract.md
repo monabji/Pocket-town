@@ -10,16 +10,18 @@ The API backs up pseudonymous progress and optionally personalizes a rule-approv
 - Responses include a stable error code and a safe user-facing message key, not provider traces or prompts.
 - Authenticate learners with a pseudonymous session token. A class code joins a classroom but is not an authentication secret.
 
+English is fixed by the application contract. Endpoints have no language or locale parameter, and text keys resolve only to approved English strings. User-facing amounts use the shared rupee formatter.
+
 ## Endpoints
 
 | Endpoint | Request | Response |
 | --- | --- | --- |
 | `POST /v1/classes/join` | `classCode`, `deviceId`, `requestId` | `learnerId`, short-lived session token, allowed content manifest. |
-| `GET /v1/content/manifest` | `language`, current content version | Available pack versions, hashes, language coverage, minimum app version. |
+| `GET /v1/content/manifest` | Current content version | Available English pack versions, hashes, minimum app version. |
 | `POST /v1/playthroughs/:id/events/batch` | Ordered choice events with IDs, branch ID, sequence, content version, optional snapshot hash | Highest acknowledged sequence and any conflict/version error. Duplicate IDs return the original acknowledgement. |
 | `GET /v1/playthroughs/:id` | Playthrough ID and token | Branch metadata and compatible restore events/snapshot; never another learner's save. |
-| `POST /v1/events/propose` | Rule selector envelope, evidence IDs, language, request ID | Validated variant/template IDs and parameter IDs or an authored fallback indicator. No balance or gate fields. |
-| `GET /v1/classes/:id/aggregates` | Facilitator token, content version filter | Counts for reach, transfer, repair, safety, and language; no raw demerit vector. |
+| `POST /v1/events/propose` | Rule selector envelope, evidence IDs, request ID | Validated variant/template IDs and parameter IDs or an authored fallback indicator. No balance or gate fields. |
+| `GET /v1/classes/:id/aggregates` | Facilitator token, content version filter | Counts for reach, transfer, repair, safety, and offline completion; no raw demerit vector. |
 
 ## Example sync request
 
@@ -49,7 +51,6 @@ The server acknowledges the event only if sequence and content IDs are valid. Th
 {
   "requestId": "event-23",
   "contentVersion": "1.0.0",
-  "language": "en",
   "targetWeight": "overspending",
   "severityBand": "medium",
   "evidenceDecisionIds": ["choice-17", "choice-21"],

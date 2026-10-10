@@ -6,11 +6,13 @@ The active branch is an event-sourced simulation with periodic snapshots. A choi
 
 All monetary values are integer paise. Each record includes `contentVersion` and a stable scenario seed so a run can be reproduced. Do not store real bank account numbers, Aadhaar, income, UPI PINs, OTPs, or real product holdings.
 
+English is fixed for all content and UI. Store stable English text keys in content; no learner language preference or translation-pack state exists. The shared display formatter renders integer paise consistently as rupees.
+
 ## Core entities
 
 | Entity | Key fields | Notes |
 | --- | --- | --- |
-| `Learner` | `learnerId`, `classId?`, `createdAt`, `selectedLanguage`, `selectedContext` | Random pseudonymous ID; no real name required. |
+| `Learner` | `learnerId`, `classId?`, `createdAt`, `selectedContext` | Random pseudonymous ID; no real name required. |
 | `Classroom` | `classId`, `classCodeHash`, `facilitatorId`, `contentVersion` | A class code joins sessions; never use the code as a learner identity. |
 | `Playthrough` | `playthroughId`, `learnerId`, `activeBranchId`, `contentVersion`, `scenarioSeed`, `currentLevelId` | One save can contain multiple comparison branches. |
 | `Branch` | `branchId`, `parentBranchId?`, `forkSnapshotId?`, `active`, `createdAt` | Exactly one active branch per playthrough. |
@@ -66,7 +68,7 @@ Before restoring a visual novel, verify that its resume record matches the activ
 | Endpoint | Purpose |
 | --- | --- |
 | `POST /v1/classes/join` | Exchange a class code for a pseudonymous learner session. |
-| `GET /v1/content/manifest` | Return available signed content versions and language packs. |
+| `GET /v1/content/manifest` | Return available signed English content versions. |
 | `POST /v1/playthroughs/:id/events/batch` | Idempotently upload local decision and snapshot metadata. |
 | `GET /v1/playthroughs/:id` | Restore a compatible saved branch. |
 | `POST /v1/events/propose` | Request a bounded event variant for a selector-created envelope. |

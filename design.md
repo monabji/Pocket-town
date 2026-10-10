@@ -31,7 +31,7 @@ The fourth reference guides the visual novel's composition. Pocket Town fills th
 2. **A town worth exploring:** Distinct buildings, small character animations, greenery, and familiar neighborhood details make the next visit appealing.
 3. **Money that can be understood:** A learner can tell what changed, where the money came from, which funds are accessible, and why a later problem relates to an earlier decision.
 4. **A safe retry:** Repair scenes feel like returning to a familiar conversation and improving a plan. Feedback remains constructive.
-5. **Readable on a phone:** Pixel artwork provides the world and atmosphere. Dialogue, amounts, translations, and touch controls stay readable at native interface size.
+5. **Readable on a phone:** Pixel artwork provides the world and atmosphere. English dialogue, amounts, and touch controls stay readable at native interface size.
 
 Exploration should be brief between chapters. Avoid long travel, precision movement, timed dialogue, or repeated animations that interrupt access to learning. A level's money goal and financial ladder remain the gameplay objectives described in [game_rules.md](game_rules.md).
 
@@ -99,7 +99,7 @@ Use deliberate pixel clusters, a limited set of shades per material, and consist
 
 Use a consistent light direction from the upper left. Shadows are small pixel shapes with a few flat values. Keep silhouettes clear at gameplay scale. Dense texture should concentrate in architecture and scenery around the walkable space, while paths and entrance areas remain quiet.
 
-Signs that must be translated are rendered from localization keys or replaceable sign layers. Do not bake essential text, rupee amounts, or choice labels into textures.
+All essential English signs are rendered from stable text keys or replaceable sign layers. Do not bake essential text, rupee amounts, or choice labels into textures.
 
 ## 6. Pocket Town palette
 
@@ -124,9 +124,9 @@ Use warm neighborhood materials and strong greenery, with quiet interface surfac
 
 Never rely on hue alone to communicate a financial outcome. Add an icon, label, and explanation. Losing simulated money should remain readable without making the entire scene punitive or alarming. Interface text colors must pass a contrast check against their actual surfaces.
 
-## 7. India-specific environment language
+## 7. India-specific environment details
 
-Gulmohar Ward is a fictional Hyderabad neighborhood. Use recognizable everyday details: a kirana awning, rice and dal containers, reusable grocery bags, fruit crates, a bicycle stand, an auto-rickshaw at the road edge, a bus shelter, a bank token counter, classroom posters, ceiling fans, a local noticeboard, and Telugu/Urdu/English signage where the content context supports it.
+Gulmohar Ward is a fictional Hyderabad neighborhood. Use recognizable everyday details: a kirana awning, rice and dal containers, reusable grocery bags, fruit crates, a bicycle stand, an auto-rickshaw at the road edge, a bus shelter, a bank token counter, classroom posters, ceiling fans, a local noticeboard, and English signage that fits the location.
 
 Buildings should feel inhabited through details such as a water tank, shaded threshold, potted plant, shop shutter, tiled floor, or bulletin board. Characters use varied everyday clothing and skin tones with equal visual care. Represent different student circumstances through optional fictional contexts and dialogue rather than reducing a setting to visible wealth or deprivation.
 
@@ -160,7 +160,7 @@ When a close conversation benefits from a portrait, place a pixel portrait near 
 
 ### Landscape layout
 
-As a starting layout, the upper roughly two-thirds of the available screen forms the scene stage and the lower third contains dialogue or choices. Let panels grow when localization or large text needs space. Use safe areas so controls remain clear of device cutouts and system navigation.
+As a starting layout, the upper roughly two-thirds of the available screen forms the scene stage and the lower third contains dialogue or choices. Let panels grow when larger text or longer English copy needs space. Use safe areas so controls remain clear of device cutouts and system navigation.
 
 ```text
 ┌──────────────────────────────────────────────────────┐
@@ -186,7 +186,7 @@ In portrait, keep a shorter stage at the top and expand dialogue and choices bel
 
 Use warm paper panels with a charcoal pixel border, a narrow inset edge, and restrained stepped corners. The panel language can echo the supplied dialogue image while using Pocket Town colors and original icons. Panels should remain visually subordinate to the dialogue and choices they contain.
 
-Use a readable font supporting the selected language for body text and monetary amounts. A pixel-styled Latin face may be used for short decorative labels after testing. Telugu and Urdu need appropriate script shaping and equivalent readability. Keep text independent of the pixel-art rendering resolution.
+Use a readable English font for body text and monetary amounts, including the rupee symbol. A pixel-styled Latin face may be used for short decorative labels after testing. Keep text independent of the pixel-art rendering resolution.
 
 Starting mobile design targets:
 
@@ -260,7 +260,7 @@ Keep raw demerit scores internal. Use feedback such as “Your plan covered groc
 
 Walking cycles, small NPC idles, restrained water movement, a ceiling fan, or a shop shutter can bring the world to life. Keep movement slow enough that building labels remain stable. Optional entrance transitions should be brief, and learners can reduce motion or skip them.
 
-Inside the visual novel, use expression changes, a small gesture toward a receipt, a calendar update, or an object highlight to support the active beat. Audio can include light neighborhood ambience, a dialogue continuation sound, and distinct but subtle confirmation/review cues. Spoken dialogue is optional and follows the same localization keys as the displayed text. Captions and silent mode preserve the full experience.
+Inside the visual novel, use expression changes, a small gesture toward a receipt, a calendar update, or an object highlight to support the active beat. Audio can include light neighborhood ambience, a dialogue continuation sound, and distinct but subtle confirmation/review cues. Spoken dialogue is optional and uses the same English text keys as the displayed text. Captions and silent mode preserve the full experience.
 
 ## 16. Asset and metadata contract
 
@@ -280,7 +280,7 @@ assets/
 content/
   maps/
   chapters/
-  translations/
+  text/
 design_references/
 ```
 
@@ -310,11 +310,11 @@ Example starting design tokens:
 }
 ```
 
-Tokens are initial design settings. Chapter layout must adapt when text size or translation requires more space.
+Tokens are initial design settings. Chapter layout must adapt when text size or longer English copy requires more space.
 
-## 17. Accessibility and localization
+## 17. English accessibility
 
-Keep all essential copy in localized strings and preserve proper shaping and direction for Telugu and Urdu. Dialogue panels expand with text. Financial data tables use readable labels and logical reading order. Avoid transliterating or rendering complex scripts in an unsuitable decorative pixel font.
+Pocket Town uses English only for story dialogue, UI, signs, captions, and optional narration. Keep all essential copy in stable English text records so content stays separate from game logic. Dialogue panels expand with text. Financial data tables use readable labels, the rupee symbol, and logical reading order. Use a body font that remains legible at large text settings.
 
 Screen-reader order follows the scene description, active speaker, dialogue, inspectable objects, choices, and consequence. Provide alternative text for the basket, changed receipt, calendar, or character gesture when it carries information. A portrait expression alone must not decide whether an offer is suspicious.
 
@@ -343,5 +343,5 @@ A building chapter and its required assets should be available offline. Save the
 - Receipts, passbooks, budgets, and other objects make money changes understandable and match the deterministic ledger.
 - Revisited buildings, repair scenes, and resume behavior reflect active story state without duplicate payments.
 - All seven levels follow the same art and interaction rules while retaining their distinct landmarks and concept ladder.
-- Labels, choices, amounts, pixel art, and translated scripts remain usable on target devices in both supported orientations.
+- English labels, choices, amounts, and pixel art remain usable on target devices in both supported orientations.
 - All design documents and the four inspiration images are stored within this project directory and use valid local links.

@@ -1,112 +1,175 @@
 # Pocket Town Delivery Phases
 
-These are dependency-based phases, not calendar estimates. Do not expand content production until the cross-level repair loop works on a device. Each phase ends with a reviewable artifact and an explicit exit test.
+These are dependency-based phases, not calendar estimates. The game is English-only: UI, building signs, visual novel dialogue, choices, financial objects, captions, facilitator views, and optional narration use English. Indian settings and rupee examples remain central.
 
-## Phase 0 — Lock the playable contract
+Phase 0 establishes a runnable foundation. Phases 1–7 each add one complete level to the financial concept ladder. Reuse the existing engine, renderer, and earlier concepts as the town grows. Every phase ends with a preview of the actual integrated game and recorded verification before work advances to the next phase.
 
-**Build:** Agree on the seven-level curriculum, ledger categories, money objectives, five weight meanings, scene schema, and event safety envelope. Create a small fixture for the ₹100 Level 1 path and ₹1,000 Level 2 default task path.
+## Cumulative playable milestones
 
-**Deliverables:** Approved versions of [product_requirements.md](product_requirements.md), [game_rules.md](game_rules.md), [content_authoring.md](content_authoring.md), JSON Schemas, and a choice sequence fixture.
+| Phase | New playable content | Complete levels at exit | Supporting capability |
+| --- | --- | --- | --- |
+| 0 | Starter map and home introduction | Foundation only; Level 1 is not yet complete | App boot, building-to-chapter contract, local save, numerical fixtures |
+| 1 | Level 1: Grocery List | 1 | Earning, spending, needs/wants, saving, ledger and weights |
+| 2 | Level 2: First Account | 1–2 | Budgeting, savings account, simple interest, earned-income gate |
+| 3 | Level 3: Surprise Week | 1–3 | Emergency buffer, liquidity, first complete cross-level repair |
+| 4 | Level 4: Prices Move | 1–4 | Inflation, revised goals, bounded AI event personalization and API |
+| 5 | Level 5: Lock or Keep Ready | 1–5 | Fixed deposits, time horizon, compounding, robust save/sync |
+| 6 | Level 6: First Pay Slip | 1–6 | Gross/net income, GST examples, revenue/profit, UPI verification, NGO delivery |
+| 7 | Level 7: Future Fair | 1–7 | Investment risk, diversification, suspicious offers, full-game verification and pilot |
 
-**Exit:** Two people can independently calculate the fixture's balances, weight changes, and gate result and get the same answer. Every level goal has at least one safe feasible path in a spreadsheet or engine simulation.
+The exact building inventory, narrative beats, and gate definitions are governed by [comprehensive_overview.md](comprehensive_overview.md) and [game_rules.md](game_rules.md). Complete level means its map, required buildings, full visual novel chapters, feasible money goal, consequences, reflection, replay, and save/resume work together. A map mockup or standalone chapter does not complete a level.
 
-## Phase 1 — Offline vertical slice
+## Mandatory preview after every phase
 
-**Build:** Expo navigation, one small pixelated 2.5D Level 1 map, layered home and kirana assets, avatar movement, depth sorting, walkable routes and building hit areas. Build a complete visual novel chapter runner with interior backgrounds, expressive character portraits, speaker dialogue, branching choices, visual consequences, financial objects, reflection, and follow-up visits. Add the ledger, local save, deterministic engine, and one authored repair chapter. Add Level 2 entry and Level 3 surprise event so the earlier Level 1 choice can matter later. Use [design.md](design.md) to lock the pixel perspective, staged interiors, and dialogue panel style before expanding production art.
+The coordinator must boot the current integrated app and preview it after every phase, including Phase 0. Do not mark a phase complete using only unit tests, static screenshots, unconnected mockups, or individual subagent handoffs.
 
-**Demo path:** Save ₹100 after groceries → earn ₹1,000 from default simulated tasks → enter Level 3 → receive an overspending bottleneck → return to the exact kirana choice → replace it → recompute and resume Level 3.
+1. Run the current build on the agreed Android target or supported runnable preview environment. Record the commit, build identifier, target/device, and launch steps.
+2. Walk the newly delivered map and enter every required building. Verify each entrance opens its full visual novel presentation: interior background, staged characters, speaker and expression, bottom dialogue panel, choices, financial objects, consequences, and reflection. Check reachable entrances, depth sorting, pixel clarity, and readable English.
+3. Play a safe completion route through the new level. Check ledger amounts, weight evidence, the money goal, progression gate, and next-level unlock when that next level is implemented. Show a clear completion state when it is not yet available.
+4. Exercise a different decision branch, save/resume, and offline play. From Phase 3 onward, demonstrate an eligible bottleneck, the exact earlier source-choice repair, recalculation, and return to the current chapter without duplicate rewards.
+5. Recheck earlier completed levels. Run the golden completion route and targeted checks for any changed shared engine, UI, content, or service behavior; cover all previous levels rather than assuming they still work.
+6. Inspect map and visual novel screens on supported orientations, with large text and captions. Confirm choices remain tappable and financial information is not clipped or hidden.
+7. Capture screenshots or a short recording from the real running build. Share the preview and, when available, its playable URL or device build with the user. Record evidence in `previews/phase-XX.md`, with media in `previews/phase-XX/`: build/commit, target, levels and routes, expected versus observed results, evidence links, defects, and fixes.
+8. Resolve defects that block the phase exit, rerun affected preview steps, then mark the phase complete. Continue authorized implementation after verification; the preview is a delivery gate, not an automatic request for approval.
 
-**Exit:** The path works end to end offline on a midrange Android device; map depth and building taps are correct; every required entrance is reachable; labels remain readable; the numbers are reproducible; replay awards no duplicate money; the player can always complete the repair.
+These evidence paths are created during implementation. Do not fabricate preview results in the planning repository. Use [quality_and_learning.md](quality_and_learning.md) for detailed checks.
 
-## Phase 2 — Complete the content ladder
+## Phase 0 — Runnable foundation and agreed contracts
 
-**Build:** Finish the seven pixelated 2.5D maps, building assets, authored routes, and choices using versioned content packs. Reuse a consistent sprite scale, perspective, ground anchors, and occlusion policy. Add simple interest, recurring budgets, emergency buffer, inflation, fixed deposits, future payslip and GST examples, UPI verification, investment scenarios, diversification, compounding, and suspicious offer scenes. Produce an authored fallback for each eligible bottleneck.
+**Build:** Initialize the React Native/Expo app, a small angled overhead 2.5D starter map, avatar movement or accessible tap navigation, a reachable home entrance, and a short English home introduction in the visual novel runner. Establish pixel scaling, asset anchors, depth order, staged interior, dialogue panel, and basic local resume. Agree on the seven-level curriculum, integer money units, ledger categories, five weights, scene schema, and event envelope. Create deterministic fixtures for the ₹100 savings gate, ₹1,000 earned-income gate, and a later source-choice repair.
 
-**Exit:** Every level has its required map, buildings, money path, consequence cards, later transfer scene, and at least one replay branch. No scene asks about a concept before its prerequisite. Bot paths can finish all levels safely.
+**Deliverables:** Runnable app scaffold; versioned shared interfaces and JSON Schemas; initial assets and chapter fixture; feasible money paths for all seven levels; synchronized governing docs. This starter chapter introduces the family and grocery errand, but does not claim to deliver full Level 1.
 
-## Phase 3 — Adaptive events and service
+**Preview:** Launch the app, move through the starter map, enter home, read the staged introduction, select a sample choice, return to the map, and reopen the saved beat. Inspect the real pixel map and interior on the target screen.
 
-**Build:** Rule selector, severity bands, event envelope, bounded AI adapter, schema/text validator, authored fallback, Node.js API, PostgreSQL save and event log, idempotent sync. Keep the model outside all money and gate calculations.
+**Exit:** The preview works. Independent calculations agree on fixture balances, weight changes, and gates. Every future level has a safe feasible numerical path. Map-to-building-to-chapter and engine command/result contracts are ready for parallel work.
 
-**Exit:** Distinct spending, cash concentration, and risk histories at the same rupee gate produce appropriate distinct events. Invalid, unsafe, timed-out, or offline AI calls produce a valid authored event without blocking play.
+## Phase 1 — Complete Level 1: Grocery List
 
-## Phase 4 — Classroom readiness
+**Build:** Finish the home, kirana, vegetable stall, bus-stop interaction, and savings visit required by Level 1. Every building opens a complete visual novel chapter. Implement household errand money versus personal money, earning, spending, essential groceries, needs versus wants, change and receipts, personal saving, reflection, and replay. Add deterministic ledger commands, weight evidence, gate evaluation, and atomic decision/snapshot/beat persistence. Introduce authored follow-up visits and safe recovery from overspending.
 
-**Build:** English polish, Telugu and Urdu content paths, Urdu right-to-left checks, subtitles, optional audio, large text, shared-device session handling, class codes, and a minimal facilitator view with aggregate progress. Review student privacy and age context with an NGO partner.
+**Preview:** Begin at home, compare shopping choices, complete the necessary groceries, return home, earn or preserve personal money, and save ₹100. Show one overspending branch and its recovery, the ledger, and the completion state. Recheck the Phase 0 launch and resume path.
 
-**Exit:** A facilitator can start a class, pause for a discussion prompt, resume saved sessions, and read aggregate concept support needs. Students can complete the app without network access or private financial data.
+**Exit:** Full Level 1 works offline. Saving ₹100 cannot bypass the grocery obligation, household funds cannot become personal rewards, and replay cannot pay twice. Map entrances, visual novel scenes, consequences, weight evidence, and save/resume pass the preview.
 
-## Phase 5 — Verification and pilot
+## Phase 2 — Complete Level 2: First Account
 
-**Build:** Engine unit and property tests, content graph validation, bot simulations, AI safety tests, offline recovery tests, device usability tests, and a small learning pilot with later transfer scenes. Use [quality_and_learning.md](quality_and_learning.md) as the test plan.
+**Build:** Add the complete Level 2 map and its account-information, bank, passbook, earning-task, and budget conversations. Reuse Level 1 saving knowledge; add opening a fictional savings account, tracking deposits/withdrawals, planning a budget, simple interest over explicit simulated time, and the difference between earned income and transfers. Implement the default ₹1,000 earned-income goal and the documented alternate stipend context. Account examples remain educational and use no real personal documents.
 
-**Exit:** All money targets and repairs are reachable; no double rewards or unresolved loops remain; learners understand why a bottleneck occurred; transfer improves after replay in the pilot. Document unresolved issues and their severity before release.
+**Preview:** Progress from the completed Level 1 save into Level 2. Visit every required building, earn ₹1,000 through the default task route, choose a deposit, inspect the budget and passbook, and observe the stated interest assumptions. Confirm transfers and interest do not count as earned income. Replay Level 1 and check that its money and decision history survive progression.
+
+**Exit:** Both levels are complete and independently resumable. Level 2 has feasible branches, accurate interest arithmetic, no duplicate task earnings, correct income categorization, and a working gate. Earlier weights persist without prematurely testing untaught concepts.
+
+## Phase 3 — Complete Level 3: Surprise Week and the repair loop
+
+**Build:** Add all Level 3 emergency-expense, service/repair, household, and accessible-money chapters. Reuse earning, budgeting, and saving while introducing emergency buffers and liquidity. Implement the rule selector, severity bands, prerequisite checks, evidence threshold, authored event envelopes, and complete cross-level repair. A qualifying earlier demerit creates a contextual bottleneck; the player returns to the original choice, replaces it, recomputes the affected branch, and resumes the current chapter. Keep AI personalization disabled until these deterministic behaviors are proven.
+
+**Preview:** Play Levels 1→2→3 with two valid histories. In the eligible history, show the bottleneck, return to the exact earlier shop decision, improve it, recalculate, and return to Surprise Week. Pay the necessary expense and retain ₹300 accessible money. Also show the route without a mandatory repair and exercise interruption/resume during repair.
+
+**Exit:** All three levels and the repair loop work offline. The engine prevents duplicate rewards and unresolved repair loops; only taught concepts and sufficient evidence can trigger ordinary mandatory repair. The golden fixture reproduces identical arithmetic and gates. Preview all prior levels with the new replay logic.
+
+## Phase 4 — Complete Level 4: Prices Move and bounded AI
+
+**Build:** Add the complete Level 4 market, household-budget, price-comparison, and goal-planning chapters. Introduce inflation through changed prices and purchasing power, reuse earlier budgets, and deliver the ₹1,500 revised goal fund. Add the Node.js API, rule-selected adaptive event service, bounded AI adapter, English/schema validator, and authored fallback. The engine alone owns money, weights, time, replay, and gates. Validated AI may personalize context and explanation within eligible authored constraints.
+
+**Preview:** Play the new price-change route, compare old and revised baskets, adjust the plan, and reach ₹1,500. Show two equal-money histories receiving appropriate different eligible events. Demonstrate a valid AI response plus invalid, timed-out, non-English, and offline responses resolving to playable English authored fallbacks. Recheck Levels 1–3 and their repair paths.
+
+**Exit:** All four levels work with or without AI/network access. Inflation explanations distinguish nominal money from purchasing power. AI cannot introduce financial advice, modify outcomes, or block progression. The actual game preview shows the fallback and deterministic results.
+
+## Phase 5 — Complete Level 5: Lock or Keep Ready and durable progress
+
+**Build:** Add the complete savings-choice, fictional fixed-deposit, time-horizon, household-need, and comparison chapters. Introduce simple versus compound growth using explicit rates and simulated periods, and the trade-off between locking money and keeping an accessible buffer. Deliver the ₹2,500 funds-plus-buffer gate as defined in the rules. Complete PostgreSQL persistence, idempotent sync, version checks, active-branch handling, and recovery from interrupted saves without requiring connectivity for play.
+
+**Preview:** Compare keeping money accessible with a fixed-term deposit, inspect the growth illustration and assumptions, experience a later expense, repair an eligible liquidity decision, and meet the ₹2,500 gate. Resume after interruption and exercise offline play followed by sync. Recheck Levels 1–4, especially branch recomputation and event fallback.
+
+**Exit:** All five levels are playable offline; sync preserves the correct branch and beat without duplicating money or losing decisions. Growth is presented as a simulation assumption. Locked funds cannot masquerade as the required accessible buffer. Preview evidence includes recovery and conflict handling.
+
+## Phase 6 — Complete Level 6: First Pay Slip and NGO delivery
+
+**Build:** Add the complete simulated-workplace, payslip, shop/stall, receipt, and payment-verification chapters. Reuse income and budgeting; add gross/net pay, illustrative deductions, GST receipt examples, revenue versus profit, and safe UPI verification. Deliver cumulative verified ₹3,500 inflows with the required ledger reconciliation. Add large text, captions, optional English narration, shared-device session separation, class codes, and an aggregate facilitator progress view. Review age context and student privacy for NGO delivery.
+
+**Preview:** Read a payslip, reconcile net money, distinguish sales from profit, inspect a fictional tax receipt, verify a payment, and meet the ₹3,500 gate. Show a verification failure and safe retry. Run a facilitator-led English session, pause for discussion, switch student sessions safely, and inspect aggregate support needs. Recheck Levels 1–5 and accessibility in their chapters.
+
+**Exit:** All six levels work without real financial accounts or private household data. Illustrative taxes and deductions are clearly identified; verified inflows and expenses reconcile. A facilitator can run and resume a shared-device class, and students can complete the experience offline. The preview verifies readable English and session privacy.
+
+## Phase 7 — Complete Level 7: Future Fair and full-game verification
+
+**Build:** Add the complete future-planning, fictional investment comparison, diversification, risk, compounding, and suspicious-offer chapters. Reuse saving, liquidity, inflation, and time horizons. Deliver the ₹5,000 protected-fund gate without counting volatile gains toward it. Include adverse and favorable simulated outcomes, concentration versus diversification, and credential/offer verification. Finish all authored repair/fallback coverage, content graph validation, meaningful engine/property tests, bot completion paths, AI safety checks, device checks, and a small learning pilot with transfer tasks.
+
+**Preview:** Reach Future Fair through the previous levels, compare concentrated and diversified scenarios, observe both favorable and adverse assumptions, reject or recover safely from a suspicious offer, and meet the protected-fund gate. Demonstrate an eligible earlier-level repair and return to the final chapter. Run the full seven-level golden route and regression checks, including offline/fallback, save/resume, large text, and facilitator delivery.
+
+**Exit:** Every level, building chapter, money path, gate, repair, and authored fallback is integrated. No double rewards or unresolved progression loops remain. Learners can explain consequences and apply lessons to transfer tasks; record the pilot findings without asserting improvement unsupported by evidence. Resolve release-blocking defects and document any remaining issues. A real full-game preview and its evidence complete the phase.
 
 ## Hackathon demonstration cut
 
-If time is limited, demonstrate Phase 1 completely and show the remaining levels as validated content maps rather than claiming they are implemented. The key proof is the same-money/different-history repair loop and exact branch recalculation. A prerecorded fallback should be a recording of the real build, not a separate mock interaction.
+The target is the complete seven-level game. If delivery time is constrained, report exactly which phases and levels pass their exits. A compelling smaller demonstration is the completed Phase 3 path: ₹100 saving → ₹1,000 earned income → emergency bottleneck → earlier choice repair → deterministic return. Later phase previews extend that same running game. A prerecorded fallback must record the real build; unfinished content maps are labeled planned content.
 
 ## Parallel implementation with subagents
 
-Use a parent coordinator to assign independent work to subagents after agreeing on the interfaces. Parallel work can shorten independent implementation and review tasks; phase dependencies and exit tests still determine when the project can advance. The coordinator keeps the playable milestone in view, resolves design decisions, integrates completed work, and verifies the complete game path.
+Use a parent coordinator to assign independent work to subagents after agreeing on interfaces. Parallel work shortens independent implementation and review tasks; phase dependencies and integrated preview gates determine advancement. The coordinator owns cross-document decisions, integrates handoffs, runs the actual game, and shares each phase preview.
 
-### Ownership and task boundaries
+### Ownership and boundaries
 
-Each task names its exact files or directories before work begins. One agent owns a file at a time. The coordinator maintains an active assignment list and assigns shared files, schemas, dependency manifests, and application entry points to one owner. Agents report a requested interface change before editing another workstream's files. In a shared checkout, work in disjoint files; with separate branches or checkouts, the coordinator integrates each reviewed change sequentially.
+Each assignment names exact files or directories. One agent owns a file at a time; shared schemas, manifests, and app entry points have one designated owner. In a shared checkout, use disjoint paths. Separate branches are integrated sequentially. Agents request interface changes before touching another workstream's files.
 
 | Workstream | Assigned ownership | Required handoff |
 | --- | --- | --- |
-| Coordinator and contracts | Shared types, schema versions, dependency manifest, app wiring, cross-document decisions, integration. | Agreed contract version, fixtures, assignment list, and integrated demo build. |
-| Financial engine | `packages/engine/` ledger, fictional time, weights, gates, replay, and engine tests. | Pure engine interface, fixture results, and evidence of deterministic replay without duplicate rewards. |
-| Town renderer | Map rendering and navigation modules in `apps/mobile/`, excluding chapter UI and shared app wiring. | Angled overhead pixel map with anchors, draw order, reachable entrances, building selection, and device evidence. |
-| Visual novel renderer | Dedicated chapter UI modules in `apps/mobile/`, excluding map rendering and financial calculations. | Building entrance opens a staged interior, speaker dialogue, expressions, objects, choices, consequences, history, and resume behavior. |
-| Art and authored content | Explicitly assigned asset bundles and level-specific content directories. Assign separate levels or asset families to separate agents. | Assets and scenes satisfying [design.md](design.md), stable IDs, localization keys, prerequisite metadata, authored repairs, and validation results. |
-| API and adaptive service | `apps/api/` endpoints, persistence adapters, sync, bounded AI adapter, and service tests. | Contract-compatible service, migration notes, validated fallback behavior, and idempotency evidence. |
-| QA and delivery | Assigned integration tests, bot fixtures, test reports, localization review, or facilitator modules. | Reproducible failures, checks against [quality_and_learning.md](quality_and_learning.md), and reviewed completion evidence. Production fixes return to the owning workstream. |
+| Coordinator/contracts | Shared types, schema versions, manifests, app wiring, integration | Contract version, fixtures, assignment list, running phase build and preview evidence |
+| Financial engine | `packages/engine/` ledger, time, weights, gates, replay and tests | Deterministic results, feasible level goals, no duplicate rewards |
+| Town renderer | Assigned map/navigation modules in `apps/mobile/` | 2.5D projection, anchors, depth order, reachable entrances and device evidence |
+| Visual novel renderer | Assigned chapter UI modules in `apps/mobile/` | Staged interiors, dialogue, expressions, choices, objects, consequences and resume |
+| Art/authored content | Separate assigned level packs or asset families | Original assets, English text keys, stable IDs, prerequisites, repairs and validated chapters |
+| API/adaptive service | Assigned `apps/api/` and client adapter modules | Contract-compatible API, bounded English events, fallbacks, migrations and sync evidence |
+| QA/delivery | Separate test suites, reports or facilitator modules | Reproducible findings and checks against [quality_and_learning.md](quality_and_learning.md) |
 
-Repository paths follow [architecture.md](architecture.md). Before the implementation repository exists, assign exact Markdown files, content fixtures, or asset deliverables using the same ownership rule. Art and content may be separate tasks once their metadata contract is agreed; they must not edit the same asset manifest simultaneously.
+Paths follow [architecture.md](architecture.md). During documentation work, assign exact Markdown files with the same ownership rule. Avoid concurrent changes to an asset manifest or shared dependency file.
 
-### Interface agreement before parallel build
+### Interface agreement in Phase 0
 
-Complete these agreements in Phase 0 and record their version. A freeze means changes require a coordinated update, not that the design can never improve.
+1. Version scene/choice IDs, concept prerequisites, integer money units, ledger categories, weight evidence, money goals, gate results, and replay semantics.
+2. Agree on engine command/result and snapshot contracts, including fixtures for both early gates and downstream repair.
+3. Fix the rectangular ground grid, angled overhead projection, asset anchors, footprints, entrance IDs, tap areas, layers, and building-to-chapter links using [design.md](design.md).
+4. Fix chapter backgrounds, staged characters, expressions, dialogue beats, financial objects, choices, consequences, history, and saved beat position. Every building opens the visual novel presentation.
+5. Agree on event envelopes, English text keys, approved fallback IDs, save/sync messages, idempotency, and version compatibility. AI cannot change numerical rules.
 
-1. Fix scene and choice IDs, concept prerequisites, ledger categories, money units, weight evidence, money goals, gate results, and replay semantics.
-2. Agree on the engine command/result and snapshot interfaces. Include a fixture covering the ₹100 savings gate, ₹1,000 earned-income gate, later bottleneck, source-choice repair, and downstream recomputation.
-3. Fix map projection, asset anchors, footprints, entrance IDs, tap areas, layer metadata, and the building-to-chapter link. Follow the rectangular ground grid and angled overhead view in [design.md](design.md).
-4. Fix the chapter format for backgrounds, staged characters, expressions, dialogue beats, financial objects, choices, consequences, follow-up visits, and saved beat position. Every building opens this visual novel presentation.
-5. Agree on event envelopes, approved fallback IDs, save/sync messages, idempotency keys, and version compatibility. The AI adapter cannot change balances, weights, or gate calculations.
+Provide versioned fixtures and stub adapters. The coordinator updates shared contracts and fixtures before assigning dependent interface changes.
 
-Provide versioned fixtures and stub adapters so each workstream can develop against the agreed interface. The coordinator reviews an interface change with the affected owners, updates shared contracts and fixtures first, then assigns the dependent changes. Do not let different agents independently redefine the same financial rule or schema.
+### Phase-specific parallel assignments
 
-### Phase-specific assignments
-
-| Phase | Tasks that can proceed independently | Integration dependency |
+| Phase | Independent assignments | Integration and preview dependency |
 | --- | --- | --- |
-| 0: Playable contract | Curriculum/content agent checks prerequisites and feasible money paths; engine agent calculates the fixture; design agent checks one home/kirana exterior and interior; QA agent independently checks the numerical path. | Coordinator reconciles the results and freezes shared schemas, interfaces, and asset metadata before implementation branches depend on them. |
-| 1: Offline vertical slice | Engine agent implements choices, gates, and repair; town agent builds navigation and depth; visual novel agent builds the chapter runner; art/content agents prepare the home, kirana, and later repair fixtures; QA agent prepares offline/resume checks. | Coordinator wires building entrances to chapters and chapters to the engine, then runs the complete Level 1 → Level 2 → Level 3 repair path on device. Expand art only after reviewing this slice. |
-| 2: Content ladder | Content agents own separate levels; art agents own separate asset families or building interiors; engine owner adds agreed financial operations; QA validates prerequisite graphs and safe completion paths as packs arrive. | Each pack must use the approved schema, asset IDs, arithmetic, and visual style. Cross-level transfer and repair scenes receive joint review before the coordinator activates the pack. |
-| 3: Adaptive service | API agent builds save/sync endpoints; adaptive-event agent builds rule-selected envelopes and bounded personalization in separately assigned modules; client owner adds sync adapters; QA exercises invalid responses and offline fallbacks. | Freeze request/response contracts first. Integrate authored fallback behavior before enabling personalization, then verify that all numerical outcomes remain in the engine. |
-| 4: Classroom readiness | Language owners review distinct translation files; visual novel owner checks expansion and script layout; facilitator agent builds aggregate views; delivery/QA owner tests shared devices and classroom flow. | Coordinator integrates approved translations and accessibility settings, then validates complete chapters and class sessions in each language. |
-| 5: Verification and pilot | QA agents divide engine/property, content/bot, service/fallback, device/accessibility, and learning-pilot checks into separate suites or reports. Module owners fix assigned findings. | Coordinator reruns affected checks and the complete demonstration path after integration. Phase exit requires observed evidence, not separate agents declaring their modules complete. |
+| 0 | Engine fixtures; curriculum feasibility; starter map/art; home chapter UI | Agree contracts, wire the starter app, then preview real map→home→resume |
+| 1 | Level 1 chapters/art; engine ledger and gates; map entrances; focused QA | Integrate full grocery-to-₹100 route and preview Level 1 |
+| 2 | Level 2 account/task content; account/interest operations; map assets; income-gate checks | Integrate full Level 2, preserve Level 1 history, preview both |
+| 3 | Level 3 emergency content; deterministic repair/selector; return UI; replay tests | Prove the complete Level 1→2→3 repair loop and preview all three |
+| 4 | Level 4 inflation content; API; bounded AI adapter; invalid/offline response checks | Integrate authored fallback first, then AI; preview Level 4 and prior levels |
+| 5 | Level 5 deposit/compounding content; persistence/sync; recovery checks | Integrate correct active-branch sync and preview all five levels |
+| 6 | Level 6 payslip/payment content; facilitator modules; English accessibility; privacy QA | Integrate classroom delivery and preview all six levels plus session flow |
+| 7 | Level 7 risk/fraud content; separate full-game test suites; pilot preparation | Integrate fixes, preview the full game, record pilot and final evidence |
 
 ### Assignment and handoff checklist
 
-An assignment states the goal, owned paths, contract version, dependencies, input fixtures, expected artifact, and acceptance check. It also states which shared files need a coordinator change. An agent completes its independent work, runs the appropriate checks, and returns changed paths, behavior implemented, test evidence, unresolved issues, and any required follow-up. Waiting on an interface is recorded as a dependency; the coordinator can assign other ready work while resolving it.
+An assignment states its goal, owned paths, contract version, dependencies, input fixtures, expected artifact, and acceptance check. A handoff reports changed paths, behavior, test evidence, unresolved issues, and required follow-up. Waiting on an interface is a recorded dependency; other ready tasks can continue.
 
-Review the handoff against the governing documents, then integrate one change at a time. Resolve conflicts with the relevant owner and update any affected fixtures. Run schema/content validation and focused checks for the change, followed by the integrated checks needed for the current phase exit. For map or chapter changes, inspect the actual device presentation, including entrance selection, pixel depth, dialogue readability, financial objects, and replay/resume. For money or service changes, rerun deterministic arithmetic, idempotency, and repair tests.
-
-Keep a working demo build after each integration. If a subtask fails its handoff check, return the specific issue to its owner and continue other independent work. The coordinator reports completed artifacts and remaining dependencies without treating parallel activity as evidence that the game is finished.
+Review handoffs against the governing docs, integrate one change at a time, and run focused validation plus the current phase's integrated checks. Inspect actual map and chapter presentation after visual changes; rerun arithmetic, idempotency, and repair checks after engine/service changes. Return failures to the relevant owner and retain a runnable build after integration. Independent agents declaring completion does not satisfy the phase preview gate.
 
 ## Workstream dependencies
 
 ```mermaid
 flowchart LR
-    R[Rules and curriculum] --> E[Deterministic engine]
-    R --> C[Content schema]
-    E --> V[Offline vertical slice]
-    C --> V
-    V --> L[Seven-level content]
-    V --> A[Adaptive service]
-    L --> Q[Classroom and learning QA]
-    A --> Q
+    P0[Phase 0: Runnable foundation] --> P1[Phase 1: Level 1]
+    P1 --> P2[Phase 2: Level 2]
+    P2 --> P3[Phase 3: Level 3 and repair]
+    P3 --> P4[Phase 4: Level 4 and AI]
+    P4 --> P5[Phase 5: Level 5 and sync]
+    P5 --> P6[Phase 6: Level 6 and NGO delivery]
+    P6 --> P7[Phase 7: Level 7 and pilot]
+    V[Actual game preview and evidence] -. required at every exit .-> P0
+    V -.-> P1
+    V -.-> P2
+    V -.-> P3
+    V -.-> P4
+    V -.-> P5
+    V -.-> P6
+    V -.-> P7
 ```

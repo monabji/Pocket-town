@@ -2,7 +2,7 @@
 
 **Purpose:** End-to-end game design for a financial decision RPG for Grades 11 and 12 in India. Each level is a pixelated 2.5D map, and tapping any building opens a visual novel chapter where the main story, decisions, and financial learning happen.
 
-**Implementation documents:** [Visual design](design.md) · [Visual novel chapters](visual_novel_design.md) · [Architecture](architecture.md) · [Delivery phases](phases.md) · [Game rules](game_rules.md) · [Content authoring](content_authoring.md) · [Screen flow](ui_flow.md) · [Adaptive event engine](ai_event_engine.md) · [Data model](data_model.md) · [API contract](api_contract.md) · [Quality and learning evaluation](quality_and_learning.md) · [Localization and NGO delivery](localization_and_delivery.md) · [Project index](README.md)
+**Implementation documents:** [Visual design](design.md) · [Visual novel chapters](visual_novel_design.md) · [Architecture](architecture.md) · [Delivery phases](phases.md) · [Game rules](game_rules.md) · [Content authoring](content_authoring.md) · [Screen flow](ui_flow.md) · [Adaptive event engine](ai_event_engine.md) · [Data model](data_model.md) · [API contract](api_contract.md) · [Quality and learning evaluation](quality_and_learning.md) · [English accessibility and NGO delivery](localization_and_delivery.md) · [Project index](README.md)
 
 *A financial decision RPG for Grades 11 and 12 in India*
 
@@ -14,7 +14,7 @@ Static lessons and fixed scripts can teach definitions without testing whether a
 
 | **Element** | **Design** |
 | --- | --- |
-| Audience | Grades 11 and 12, with contexts and language options suited to NGO delivery in India |
+| Audience | Grades 11 and 12, with English content and adaptable fictional money contexts suited to NGO delivery in India |
 | Format | pixelated 2.5D map in React Native and Expo; layered buildings and animated sprites; tap a building to enter a branching visual novel |
 | Main learning experience | Every building opens a visual novel chapter with a location background, expressive characters, dialogue, consequential choices, and visible financial outcomes |
 | Story goal | Prepare a personal next step goal and help friends build a Money Wall for the neighborhood fair |
@@ -39,7 +39,7 @@ The player is a final year school student in Gulmohar Ward, a fictional part of 
 
 | **Character** | **Role in the story** |
 | --- | --- |
-| The player | Chooses a name, language, money context, and goal; no real financial data is requested |
+| The player | Chooses a name, money context, and goal; all content is in English and no real financial data is requested |
 | Farah | Friend saving for dependable travel; challenges the player to separate a useful expense from an impulse |
 | Teja | Friend helping with the fair; curious about banks, interest, and later investing |
 | Aditi | Friend who receives a suspicious scholarship or earnings message; the player helps verify it |
@@ -150,7 +150,7 @@ The learning center pays the group for approved fair preparation tasks, or the c
 
 ### Buildings and visual novel interactions
 
-**School project desk.** Choose among safe fictional tasks such as poster design, inventory counting for the fair, or translation review. The student sees time required and agreed payment before accepting. No real employment or payment is involved.
+**School project desk.** Choose among safe fictional tasks such as poster design, inventory counting for the fair, or proofreading an English notice. The student sees time required and agreed payment before accepting. No real employment or payment is involved.
 
 **Bank branch.** A staff character explains account purpose, deposits, withdrawals, interest, and what documents or guardian support may depend on age and bank rules. The player asks questions and selects a fictional account pathway; no real account is opened.
 
@@ -329,15 +329,15 @@ A different player may reach Map 5 with a sound grocery plan but lock nearly eve
 | Decision and concept log | Store scene ID, choice, concept taught, concept reused, rationale, effect, and version for accurate replay and AI evidence. |
 | Five demerits and history | Track observed habits, evidence IDs, thresholds, and decay after improved choices. |
 | Level snapshots | Recompute downstream outcomes after a rewind; prevent replay farming and duplicate interest. |
-| Language and context | Select translation, accessibility settings, and scenario money scale without storing real income. |
+| Accessibility and context | Select text/audio preferences, accessibility settings, and scenario money scale without storing real income. |
 
 On replay, the player chooses a new branch at an earlier snapshot. All downstream fictional balances and events are recomputed from that point. The old path remains in a read only comparison view but awards no extra money. A player can finish with a lower balance after making a more thoughtful decision; the game explains the tradeoff rather than declaring the choice wrong. Market outcomes use fixed story seeds per comparison so the player learns from decisions rather than a lucky reroll.
 
 ## Educational and cultural design
 
-- Use Hyderabad details as ordinary life: kirana quantities, school commutes, local market prices, a bank branch, UPI screens, multilingual signs, and a community learning center. Do not use poverty as a spectacle or assume all students share a household structure.
+- Use Hyderabad details as ordinary life: kirana quantities, school commutes, local market prices, a bank branch, UPI screens, English signs, and a community learning center. Do not use poverty as a spectacle or assume all students share a household structure.
 
-- Write scenes in short, translatable strings. Prepare English, Telugu, and Urdu content paths; Urdu requires right to left interface checks. Use icon and number support, subtitles, and optional audio for mixed literacy needs.
+- Write every scene and interface label in clear English with stable text keys. Use icon and number support, English captions, and optional English narration for accessibility. Setup uses the fixed English experience with no language selector.
 
 - Make an expense's role depend on context. Mobile data may support classes; travel may be essential; a celebration may have social value. Avoid a rigid needs versus wants label.
 
@@ -356,23 +356,23 @@ A facilitator creates an anonymous class code, loads a content pack, and lets st
 | Reach | Activated learners, started maps, completed maps, and time per map |
 | Understanding | Percentage who apply earning, saving, budgeting, inflation, interest, or risk in a later transfer scene rather than repeat a same-scene quiz |
 | Repair | Which bottlenecks occur, resolve, or need a hint; no public ranking of students |
-| Accessibility | Language selection, offline completion, and content load failures |
+| Accessibility | Text/audio preferences, offline completion, and content load failures |
 | Safety | Whether the learner checks suspicious offers and protects simulated credentials |
 
-The strongest learning test is transfer: a player who budgets correctly at the kirana shop later handles an unrelated fair expense without being prompted with the same wording. Playtesting should check this across language versions and money contexts. Rewards are awarded for reasoning, recovery, and verification, never for ending with the largest balance or taking the highest risk.
+The strongest learning test is transfer: a player who budgets correctly at the kirana shop later handles an unrelated fair expense without being prompted with the same wording. Playtesting should check this across English accessibility modes and money contexts. Rewards are awarded for reasoning, recovery, and verification, never for ending with the largest balance or taking the highest risk.
 
 ## Implementation blueprint
 
 | **Layer** | **Responsibility** |
 | --- | --- |
 | React Native and Expo client | pixelated 2.5D map renderer with layered sprites, depth sorting, building hit areas and tap-to-move routes; visual novel, HUD, local state, offline replay |
-| JSON content engine | Level scenes as branching graphs with prerequisite concepts, newly taught concepts, later transfer scenes, choice effects, pass criteria, and translations |
+| JSON content engine | Level scenes as branching graphs with prerequisite concepts, newly taught concepts, later transfer scenes, choice effects, pass criteria, and English text keys |
 | Deterministic game engine | Exact money arithmetic, time steps, asset values, interest assumptions, weight rules with decay, two gates, and branch recalculation |
 | Hybrid event generator | Rules set event type and severity from demerits and portfolio; AI personalizes bounded narrative and parameters |
 | Node and TypeScript API | Pseudonymous authentication, cloud save, demerit history, event logs, and facilitator progress on PostgreSQL or Firebase |
 | Offline and safety layer | Cached authored events, validated model output, content versioning, and sync after connectivity returns |
 
-Build the full seven map content plan, then first validate one cross map path: a Map 1 money pass with overspending demerit, Map 2 entry, a Map 3 personalized event, a return to Map 1, and resumption in Map 3. This proves the distinguishing loop end to end. Finish the remaining maps using the same JSON and simulation contracts. The production system must work with its offline authored fallback when an AI request fails.
+Build a runnable foundation in Phase 0, then add one complete level per phase in Phases 1–7. Preview the actual integrated game after every phase, including its new content and the previously completed levels. Phase 3 completes the first cross-map repair path: a Map 1 money pass with overspending evidence, Map 2 task earnings, a Map 3 event, a return to Map 1, and resumption in Map 3. Later phases add the remaining levels using the same JSON and simulation contracts. The production system must work with its offline authored fallback when an AI request fails. Preview evidence and the release gates are specified in [phases.md](phases.md).
 
 ## Planned testing methodology
 
@@ -381,7 +381,7 @@ Build the full seven map content plan, then first validate one cross map path: a
 | Unit tests | Deterministic choice sequences produce expected wallet, asset, demerit vector, decay, Gate 1, Gate 2, and concept eligibility results. |
 | Bot simulations | Reckless spender, cash-heavy long-horizon learner, and concentrated-risk learner receive distinct eligible events; each can repair and complete every map. |
 | Path divergence | Different histories at the same money gate lead to meaningfully different event types or dialogue while equivalent choices remain reproducible for debugging. |
-| Event safety | Generated text cannot change engine numbers or exceed bounds; financial claims, age context, and translation pass review. |
+| Event safety | Generated English text cannot change engine numbers or exceed bounds; financial claims, age context, and clarity pass review. |
 | Usability and performance | Mid-range Android and iOS playtests check navigation, save and resume, offline play, load time, and whether students understand why an event occurred. |
 | Concept ladder | Each of the eight named concepts appears in an active choice, a visible consequence, and at least one later transfer scene; no bottleneck uses an untaught concept. |
 | Pilot learning | Later transfer scenes show concept-score improvement without simply repeating the original question. |

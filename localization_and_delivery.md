@@ -1,19 +1,19 @@
-# Pocket Town Localization and NGO Delivery
+# Pocket Town English Accessibility and NGO Delivery
 
 ## Indian setting with adaptable contexts
 
-The default setting is Gulmohar Ward, a fictional Hyderabad neighborhood. Kirana quantities, school commutes, a bank branch, UPI screens, local printing costs, and a community learning center make choices recognizable. These details are story context, not a claim that all Indian students have the same family structure, income, job, bank access, or language.
+The default setting is Gulmohar Ward, a fictional Hyderabad neighborhood. Kirana quantities, school commutes, a bank branch, UPI screens, local printing costs, and a community learning center make choices recognizable. These details are story context, not a claim that all Indian students have the same family structure, income, job, or bank access.
 
 At setup, the learner chooses a fictional goal and a money context. The default uses a small allowance plus supervised school-fair task pay. Alternate contexts may use a stipend, family-allocated expense money, or supervised fair earnings. The ledger labels each source accurately. All costs and objectives scale together so the same concepts and safe routes remain available. A learner is never asked to enter real income or account details.
 
-## Language-ready content
+## English-only content
 
-- Plan content paths for English, Telugu, and Urdu. Confirm first-release language priorities with the NGO partner.
-- Keep story and UI strings in the versioned content pack, with stable keys and placeholders for amount, date, character, and goal. Never concatenate English fragments to build translated sentences.
-- Give translators scene intent, speaker relationships, the expected decision, and screenshots. Review the financial meaning of words such as deposit, interest, balance, risk, and collect request with local educators.
-- Format rupees, numbers, and dates consistently for the selected locale while keeping arithmetic unchanged. The player may switch language without changing game state.
-- Urdu requires right-to-left layout review of dialogue, choice order, icons, number runs, ledger columns, and map labels. Do not simply mirror every visual asset.
-- Support captions for audio, optional audio narration for dialogue and consequences, and an easy replay of explanations.
+- Use English only for dialogue, choices, UI, signs, captions, facilitator materials, and optional narration.
+- Keep complete English story and UI strings in the versioned content pack, with stable keys and placeholders for amount, date, character, and goal. Separate text from game logic and avoid concatenating sentence fragments.
+- Give content reviewers scene intent, speaker relationships, the expected decision, and screenshots. Review plain-English explanations of deposit, interest, balance, risk, and collect request with local educators.
+- Format Indian rupees, numbers, and dates consistently using English labels and Indian number grouping where appropriate. Keep arithmetic and integer-paise storage unchanged.
+- Test readable English typography, full choice labels, rupee glyphs, ledger columns, and map labels at larger text sizes.
+- Support English captions, optional English narration for dialogue and consequences, and an easy replay of explanations.
 
 ## Accessibility and usability
 
@@ -27,7 +27,7 @@ Each building interaction targets a short session. The map should make the next 
 2. Students join on personal or shared devices using a pseudonymous learner ID. Shared-device switching must close the previous student's session cleanly.
 3. The game runs offline, saves locally, and queues anonymous progress for later sync.
 4. A facilitator may pause after a map for a two-minute discussion prompt about choices and tradeoffs. No student is required to reveal a private choice aloud.
-5. The facilitator view shows aggregate map progress, transfer outcomes, bottlenecks needing hints, language selection, and content failures. It does not rank students by money or expose raw demerit vectors.
+5. The facilitator view shows aggregate map progress, transfer outcomes, bottlenecks needing hints, accessibility support needs, and content failures. It does not rank students by money or expose raw demerit vectors.
 
 ## Safety review before NGO deployment
 
@@ -38,5 +38,5 @@ Use only fictional products and scenarios. Explain that investment outcomes are 
 - Bundle all required scenes and authored bottlenecks for offline play.
 - Test installation, storage, save/resume, and audio/text mode on the NGO's actual shared devices.
 - Provide a one-page facilitator guide for starting, pausing, hints, privacy, and post-session discussion.
-- Publish a content version and translation review date so facilitators know which pack a classroom used.
+- Publish a content version and English content review date so facilitators know which pack a classroom used.
 - Provide an export of aggregate progress and a way to delete a pseudonymous learner save.

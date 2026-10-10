@@ -10,12 +10,12 @@ Students practice money decisions in a safe Indian neighborhood simulation. They
 | --- | --- | --- |
 | Student | Understand a financial choice and recover from a poor one without real loss or shame. | Can explain the ledger change and apply the same concept in a later scene. |
 | NGO facilitator | Start a classroom session on shared or personal devices and support students who are stuck. | Can issue a class code, see progress and concept support needs, and use discussion prompts without exposing private choices. |
-| Content author | Add a story branch or translation without changing engine code. | Validated content pack builds and its scene graph remains reachable. |
+| Content author | Add an English story branch without changing engine code. | Validated content pack builds and its scene graph remains reachable. |
 | Tester | Reproduce a path and compare it with another path at the same money gate. | Deterministic log and seed reproduce the same balances, weights, and event eligibility. |
 
 ## Required player experience
 
-1. Select language, an optional money context, and a fictional goal. No real financial details are requested.
+1. Start the English experience, select an optional money context and a fictional goal, and set text/audio preferences. No real financial details are requested.
 2. Explore a pixelated 2.5D map with layered buildings, streets, and an animated avatar. Tap any building to transition into its full visual novel chapter with an illustrated background, expressive character portraits, dialogue, and branching decisions.
 3. Make a consequential choice. Show rupees, time, access to money, and social implications before or after the choice as appropriate.
 4. See a clear consequence card, updated ledger, and a short explanation. Let the player compare an alternate path without receiving duplicate money.
@@ -49,7 +49,8 @@ The amounts are default fictional classroom values and scale together for altern
 - The event system can choose different eligible bottlenecks for players with the same rupee total but different decision histories. An authored fallback covers every required event type.
 - A repair loop must have a reachable solution, one mandatory bottleneck at a time, hints, and no repeat of the same resolved loop.
 - Save and resume work on a midrange Android device while offline. Sync is optional for gameplay.
-- The game can run in English; Telugu and Urdu content paths and right-to-left review are release requirements.
+- All player-facing interface, dialogue, signage, captions, and optional narration use English. Content uses stable English text keys; there is no language selector or multilingual release workstream.
+- Phases 1–7 each add one complete playable level. Every phase, including the runnable foundation, ends with an actual game preview, checks of earlier completed levels, and recorded evidence before the phase is marked complete.
 - The facilitator can see aggregate reach, transfer, repair, and safety indicators, with no public ranking.
 
 ## Safety and educational constraints
@@ -67,5 +68,5 @@ Real banking integration, real-money rewards, market feeds, investment advice, a
 ## Open product decisions before content lock
 
 - Set exact session length after testing the first three levels with students; the current three-to-five-minute building target is a hypothesis.
-- Choose and validate the first release languages with NGO partners. English, Telugu, and Urdu are the planned paths.
+- Review English dialogue clarity and optional narration needs with NGO partners while keeping the release language fixed to English.
 - Confirm whether a facilitator dashboard needs a separate web app or an API-backed view in the mobile app. The data contract remains the same.

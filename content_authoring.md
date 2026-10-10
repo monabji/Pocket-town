@@ -2,7 +2,7 @@
 
 ## Content model
 
-The seven pixelated 2.5D maps and building interactions live in versioned JSON content packs, not hard-coded screen components. A pack contains logical map geometry, layered sprite assets, building footprints and entrances, scenes, choices, ledger effects, concept tags, translation keys, illustrative financial assumptions, and authored adaptive-event fallbacks. The renderer displays content; the [game engine](game_rules.md) validates and applies effects.
+The seven pixelated 2.5D maps and building interactions live in versioned JSON content packs, not hard-coded screen components. A pack contains logical map geometry, layered sprite assets, building footprints and entrances, scenes, choices, ledger effects, concept tags, English text keys, illustrative financial assumptions, and authored adaptive-event fallbacks. The renderer displays content; the [game engine](game_rules.md) validates and applies effects.
 
 ## Required IDs and relationships
 
@@ -13,7 +13,7 @@ conceptId → prerequisiteConceptIds → teachingSceneIds → transferSceneIds
 eventTemplateId → targetWeight → sourceSceneId → returnCheckpoint
 ```
 
-IDs are stable across translations. Never derive logic from visible dialogue text. A content pack has a semantic version and migration map for renamed IDs. Each active save is pinned to the pack version used when it began.
+IDs are stable across English copy revisions. Never derive logic from visible dialogue text. A content pack has a semantic version and migration map for renamed IDs. Each active save is pinned to the pack version used when it began.
 
 ## 2.5D map contract
 
@@ -21,7 +21,7 @@ Each level map declares `projection: "angled_overhead"`, logical map bounds, `gr
 
 Each placed building specifies `buildingId`, logical position, `assetId`, `groundAnchor`, collision footprint, reachable `entranceNodeId`, screen-independent tap polygon, label key, and associated scene IDs. Asset metadata may provide separate base, roof, and foreground layers with depth anchors and an occlusion policy. Decorative height has no effect on movement unless an explicit elevated route is authored.
 
-The content validator checks that the spawn can reach every required entrance, footprints do not block the only repair route, interaction polygons resolve overlapping buildings sensibly, and each asset and localized label exists. A repair pin attaches to the source building's entrance, not an arbitrary sprite corner.
+The content validator checks that the spawn can reach every required entrance, footprints do not block the only repair route, interaction polygons resolve overlapping buildings sensibly, and each asset and English label exists. A repair pin attaches to the source building's entrance, not an arbitrary sprite corner.
 
 ## Scene contract
 
@@ -32,7 +32,7 @@ Each scene specifies:
 - `sceneId`, `levelId`, `buildingId`, and `kind` (`dialogue`, `choice`, `consequence`, `reflection`, `repair`, or `gate`).
 - `prerequisiteConceptIds` and any prerequisite scene/flag. A prerequisite limits advanced dialogue; basic exploration remains possible.
 - `teachesConceptIds` and `reusesConceptIds`. A concept is considered taught only after an active decision and consequence, not after reading a line.
-- Ordered dialogue beats as localization keys and speaker IDs, with background, character portrait/expression, and optional animation/audio cues. Provide text alternatives for information carried by artwork.
+- Ordered English dialogue beats as stable text keys and speaker IDs, with background, character portrait/expression, and optional animation/audio cues. Provide text alternatives for information carried by artwork.
 - Two or more plausible choices for a meaningful decision; each has an explanation key, deterministic effect IDs, and next scene ID.
 - An immediate consequence, at least one delayed consequence or transfer reference, and an accessible replay comparison.
 - A validity predicate that ensures a path is available with the player's resources and context.
@@ -95,12 +95,12 @@ The full narrative, characters, money goals, and building dialogue intentions ar
 6. Do not require real documents, PINs, OTPs, employment, or financial disclosure to complete a scene.
 7. Include at least one later transfer scene for each of the eight named concepts. The Level 7 fairground can be the later integrated transfer for concepts introduced earlier in that same level.
 
-## Localization and assets
+## English content and assets
 
-All dialogue and UI copy use stable keys with placeholders for amounts, names, and dates. Translators receive character intent and a screenshot context, not just a string list. Do not concatenate sentence fragments in code. Money formatting, Urdu right-to-left layout, and optional audio are specified in [localization_and_delivery.md](localization_and_delivery.md).
+All dialogue, UI copy, signs, captions, and optional narration use English only. Store complete English sentences under stable keys with placeholders for amounts, names, and dates; content keys separate writing from game logic. Review financial terms in scene context with educators. Do not concatenate sentence fragments in code. Rupee formatting, accessible English text, and optional English narration are specified in [localization_and_delivery.md](localization_and_delivery.md).
 
 Visual assets are referenced by IDs and have a text equivalent. The town uses ground tiles for the angled overhead view, building sprites with consistent perspective, character movement frames, ground shadows, and optional foreground props. All assets share an authored ground anchor and visual scale. Buildings must remain recognizable without color alone. A content pack may include low-memory assets for shared Android devices. Palettes, pixel treatment, proportions, and staged interior compositions follow [design.md](design.md).
 
 ## Build-time validation
 
-The content build fails when an ID is missing, a dialogue key lacks a required language, a choice has no reachable next scene, a required building has no consequential interaction, a gate has no safe path, or a repair has no source and return checkpoint. A graph traversal checks cycles and unreachable nodes. A concept dependency check prevents untaught concepts in required dialogue or event eligibility. A financial validator checks that choices and rates stay within approved scenario bounds.
+The content build fails when an ID is missing, a dialogue key lacks its English text, a choice has no reachable next scene, a required building has no consequential interaction, a gate has no safe path, or a repair has no source and return checkpoint. A graph traversal checks cycles and unreachable nodes. A concept dependency check prevents untaught concepts in required dialogue or event eligibility. A financial validator checks that choices and rates stay within approved scenario bounds.

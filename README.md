@@ -2,6 +2,8 @@
 
 Pocket Town is a mobile financial decision game for students in Grades 11 and 12 in India. The player explores seven pixelated 2.5D neighborhood maps. Every building opens a visual novel chapter with illustrated locations, character dialogue, branching decisions, and visible financial consequences. These chapters carry the main learning experience and link visits across the town. All money and products in the game are simulated.
 
+The game uses English throughout its interface, dialogue, signage, captions, and optional narration. Phases 1–7 each deliver the next complete level; every phase requires an actual runnable game preview and recorded verification before work advances.
+
 ## Read in this order
 
 | File | What it answers |
@@ -10,16 +12,16 @@ Pocket Town is a mobile financial decision game for students in Grades 11 and 12
 | [design.md](design.md) | How should the pixelated 2.5D town and building visual novels look, using the supplied visual references? |
 | [product_requirements.md](product_requirements.md) | What must the player, facilitator, and demo be able to do? |
 | [game_rules.md](game_rules.md) | How do money, behavioral weights, gates, replay, and repairs work exactly? |
-| [content_authoring.md](content_authoring.md) | How are maps and branching scenes written, translated, validated, and versioned? |
+| [content_authoring.md](content_authoring.md) | How are maps and English branching scenes written, validated, and versioned? |
 | [visual_novel_design.md](visual_novel_design.md) | How does every building deliver a visual novel chapter and teach through narrative choices? |
 | [ui_flow.md](ui_flow.md) | What screens and interactions must the player experience? |
 | [ai_event_engine.md](ai_event_engine.md) | How are player-specific bottlenecks selected and safely personalized? |
 | [architecture.md](architecture.md) | What runs on the device and server, and how do the pieces communicate? |
 | [data_model.md](data_model.md) | What data is stored, synced, and shown to facilitators? |
 | [api_contract.md](api_contract.md) | What messages and error cases connect the app and server? |
-| [localization_and_delivery.md](localization_and_delivery.md) | How does the game work across languages, devices, and NGO classrooms? |
+| [localization_and_delivery.md](localization_and_delivery.md) | How do English content, accessibility, devices, and NGO classrooms work together? |
 | [quality_and_learning.md](quality_and_learning.md) | What must be tested before claiming the game works or teaches? |
-| [phases.md](phases.md) | In what order should the team build and demonstrate it, including parallel subagent assignments and integration gates? |
+| [phases.md](phases.md) | How does each phase add a playable level, use subagents, and finish with a verified game preview? |
 
 ## Source of truth
 
@@ -33,4 +35,4 @@ Pocket Town is a mobile financial decision game for students in Grades 11 and 12
 
 ## First playable milestone
 
-Implement the complete Level 1 → Level 2 → Level 3 repair path. A player can save ₹100, enter Level 2, earn ₹1,000 in the default simulated task path, encounter a later consequence driven by Level 1 overspending evidence, return to the earlier kirana decision, and resume Level 3 with recalculated balances. The same path must run offline from authored content.
+Phase 1 delivers all of Level 1; Phase 2 adds all of Level 2; Phase 3 adds all of Level 3 and completes the first cross-level repair milestone. A player can save ₹100, enter Level 2, earn ₹1,000 in the default simulated task path, encounter a later consequence driven by Level 1 overspending evidence, return to the earlier kirana decision, and resume Level 3 with recalculated balances. The same path must run offline from authored content, and each phase has its own runnable preview.

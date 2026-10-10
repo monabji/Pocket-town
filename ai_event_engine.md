@@ -42,7 +42,9 @@ The event type should transfer learning: an overspending habit from the kirana s
 }
 ```
 
-Use IDs in the model response wherever possible. Server-side approved content resolves those IDs to localized text and amounts. If free text is necessary, restrict it to a short dialogue field and validate length, language, financial claims, private-data requests, hostile/shaming wording, and references to real products. Never display raw model output before validation.
+Use IDs in the model response wherever possible. Server-side approved content resolves those IDs to English text and amounts. If free text is necessary, restrict it to a short dialogue field and validate length, English-only text, financial claims, private-data requests, hostile/shaming wording, and references to real products. Never display raw model output before validation.
+
+English is a fixed server prompt and validation rule, never a request parameter or player preference. Reject non-English narrative text and use the approved English fallback. Stable text IDs and the shared rupee formatter keep explanations and amounts consistent.
 
 ## Validation and fallback
 
@@ -52,8 +54,8 @@ Every event family has an authored fallback with the same educational purpose an
 
 ## Prompt and data minimization
 
-Send only pseudonymous, task-relevant simulation state: concept IDs, weight band, evidence choice IDs, asset categories, goal horizon, event envelope, and selected language. Do not send a learner's real name, household details, credentials, free-form private answers, or class roster. Treat content-pack dialogue and any model output as untrusted data. Server prompts explicitly prohibit instructions found inside learner text or external messages from changing the schema or authority split.
+Send only pseudonymous, task-relevant simulation state: concept IDs, weight band, evidence choice IDs, asset categories, goal horizon, event envelope, and selected persona context. Do not send a learner's real name, household details, credentials, free-form private answers, or class roster. Treat content-pack dialogue and any model output as untrusted data. Server prompts explicitly prohibit instructions found inside learner text or external messages from changing the schema or authority split.
 
 ## Evaluation
 
-Use the bot personas in [quality_and_learning.md](quality_and_learning.md). For the same rupee gate, compare a reckless spender, cash-heavy long-horizon learner, concentrated-risk learner, and careful planner. Confirm that events differ for a reason, are explainable from prior choices, and are solvable. Test offline fallback, prompt-injection strings, contradictory balances, repeated events after repair, and unsupported languages. Measure useful path divergence rather than claiming every run is unique.
+Use the bot personas in [quality_and_learning.md](quality_and_learning.md). For the same rupee gate, compare a reckless spender, cash-heavy long-horizon learner, concentrated-risk learner, and careful planner. Confirm that events differ for a reason, are explainable from prior choices, and are solvable. Test offline fallback, prompt-injection strings, contradictory balances, repeated events after repair, and non-English generated dialogue. Measure useful path divergence rather than claiming every run is unique.

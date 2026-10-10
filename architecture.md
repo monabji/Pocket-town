@@ -6,6 +6,8 @@ The app is a React Native and Expo game with a pixelated 2.5D map, a branching v
 
 The engine computes all money, gates, weight changes, and replay results. The AI service may only choose an approved event variant and bounded narrative parameters. See [game_rules.md](game_rules.md) and [ai_event_engine.md](ai_event_engine.md).
 
+The game has one fixed content language: English. There is no language selector, translation pack, or right-to-left layout. Content IDs resolve to English strings; display currency consistently as rupees using the shared formatter.
+
 ## System diagram
 
 ```mermaid
@@ -35,7 +37,7 @@ apps/
 packages/
   engine/                 Pure TypeScript ledger, rules, gates, replay, tests
   content-schema/         JSON Schema, types, content validator
-  content/                Seven maps, translations, authored fallback events
+  content/                Seven maps, English text, authored fallback events
   shared/                 API contracts and stable IDs
 ```
 
@@ -46,8 +48,8 @@ packages/
 | Map renderer | Project logical map coordinates into the angled overhead view; draw ground, buildings, sprites and foreground layers with correct depth; manage camera, hit areas, walkable routes and repair pins. Navigation never changes money by itself. |
 | Visual novel renderer | Open a full chapter on every building selection: illustrated background, character portraits and expressions, speaker dialogue, branching choices, financial objects/overlays, consequence beats, reflection and replay. Resolve follow-up chapters from saved story state and content JSON. |
 | Game engine | Apply choices, maintain integer-paise ledger, advance fictional time, calculate interest and asset scenarios, update weights, evaluate gates, and recompute branches. It is a pure function over versioned state and choice data. |
-| Content loader | Validate signed/versioned content packs, resolve localization keys, and keep the active save bound to a compatible content version. |
-| Local store | Persist the current snapshot, append-only decision log, language, accessibility options, and pending sync work. Expo SQLite is a reasonable starting adapter. |
+| Content loader | Validate signed/versioned content packs, resolve stable English text keys, and keep the active save bound to a compatible content version. |
+| Local store | Persist the current snapshot, append-only decision log, accessibility options, and pending sync work. Expo SQLite is a reasonable starting adapter. |
 | Sync worker | Upload pseudonymous event batches when online, retry idempotently, and never block offline play. |
 
 ## 2.5D map rendering and navigation
@@ -75,7 +77,7 @@ The map renderer consumes versioned geometry and asset metadata from [content_au
 - **API:** authentication through a random learner ID and class code, save backup, content manifest, event request, and facilitator aggregate endpoints. No real bank login or financial account connection exists.
 - **PostgreSQL:** durable learner progress and versioned decisions. A Firebase adapter is possible later, but use one backing store for the first implementation.
 - **AI adapter:** receives a small, pseudonymous state summary and a rule-selected event envelope. It returns structured event text/variant IDs, never a changed balance or gate. The API validates it and uses an authored fallback when unavailable.
-- **Facilitator view:** shows map completion, concept transfer, bottleneck resolution, language and offline completion counts. It does not expose individual financial choices to peers.
+- **Facilitator view:** shows map completion, concept transfer, bottleneck resolution and offline completion counts. It does not expose individual financial choices to peers.
 
 ## Choice transaction
 
@@ -110,4 +112,6 @@ Activate a repair branch and its recomputed snapshot/return beat atomically. Res
 
 ## Design review gates
 
-The vertical slice must prove offline play, deterministic replay, a later bottleneck from earlier evidence, and exact return to the source choice. Full release additionally requires the seven-map content pack, translations, facilitator aggregates, and the test gates in [quality_and_learning.md](quality_and_learning.md).
+The vertical slice must prove offline play, deterministic replay, a later bottleneck from earlier evidence, and exact return to the source choice. Full release additionally requires the seven-map English content pack, facilitator aggregates, and the test gates in [quality_and_learning.md](quality_and_learning.md).
+
+Every implementation phase in [phases.md](phases.md) must conclude with a running, integrated game preview covering its new playable content and regression of earlier levels. Phase 0 previews the runnable foundation; Phases 1–7 each preview one additional complete level. Record the build, device, demonstrated path, results, and observed issues before marking the phase complete.

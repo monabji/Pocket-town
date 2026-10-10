@@ -4,7 +4,7 @@
 
 ```mermaid
 flowchart TD
-    Start[Language and context setup] --> Home[Level map]
+    Start[Context and accessibility setup] --> Home[Level map]
     Home --> Building[Building visual novel]
     Building --> Choice[Decision choices]
     Choice --> Result[Consequence and ledger]
@@ -24,7 +24,7 @@ Visual styling follows [design.md](design.md): a pixelated town in an angled ove
 
 | Screen | Required information and action |
 | --- | --- |
-| Setup | Language, optional fictional money context, goal, audio/text preferences, anonymous class code if used. Explain that no real financial data is needed. |
+| Setup | Optional fictional money context, goal, English narration/text preferences, anonymous class code if used. Explain that no real financial data is needed. |
 | Map | pixelated 2.5D buildings and streets, animated avatar, current goal, accessible money, active story task, completed scene markers, and a distinct repair pin when applicable. Movement is exploratory and never charges money. |
 | Visual novel | Dedicated chapter screen opened by every building: illustrated location background, expressive character portraits, speaker name, dialogue box, optional audio/subtitles, branching choices, financial scene objects, consequence beats and back-to-map after a story lead. |
 | Decision preview | Show known price, time, access, and conditions. Do not reveal an unknown future surprise, but do not hide a stated fee or term. |
@@ -50,7 +50,7 @@ The visual novel is the primary teaching experience. All building conversations,
 
 ## Accessibility review
 
-Text can enlarge without clipping choices. Every map icon has a label and screen-reader name. Color is not the only sign of a completed, open, or repair building. Screen reader focus follows speaker, dialogue, options, then consequence. Urdu right-to-left review must cover map labels, choice order, and mixed number/currency runs. See [localization_and_delivery.md](localization_and_delivery.md).
+Text can enlarge without clipping choices. Every map icon has a label and screen-reader name. Color is not the only sign of a completed, open, or repair building. Screen reader focus follows speaker, dialogue, options, then consequence. Review English map labels, choice order, and rupee amounts at large text sizes. All dialogue, captions, UI, and optional narration use English. See [localization_and_delivery.md](localization_and_delivery.md).
 
 ## Vertical-slice screen acceptance
 

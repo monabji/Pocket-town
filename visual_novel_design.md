@@ -56,7 +56,7 @@ The AI can personalize approved character lines and event variants inside this c
 
 ## Chapter content and save contract
 
-Every building chapter declares a chapter ID, entry conditions, background asset, character IDs and expression assets, ordered dialogue beats, stable localization keys, scene objects, choices, consequence branches, reflection, and exit leads. Alternative text covers essential visual information. Optional audio references the same localized beats.
+Every building chapter declares a chapter ID, entry conditions, background asset, character IDs and expression assets, ordered dialogue beats, stable English text keys, scene objects, choices, consequence branches, reflection, and exit leads. Alternative text covers essential visual information. Optional English narration references the same English dialogue beats; captions preserve their full meaning.
 
 Save the playthrough, active branch, snapshot, chapter, scene, current beat, committed decision event, any open object overlay, and content version. Commit a decision, its resulting snapshot, and the post-choice resume beat in one local transaction. Restoring a chapter must match the active branch and display a previously committed consequence without applying its transaction again. A repair replaces the active resume record with the recomputed later checkpoint; it cannot restore dialogue from the old comparison branch. Revisits resolve to a follow-up, reflection, or repair chapter rather than automatically replaying the first visit.
 
