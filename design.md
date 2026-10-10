@@ -4,6 +4,8 @@ Pocket Town is a financial learning game with a pixelated 2.5D neighborhood and 
 
 This is the visual design authority for the project. [comprehensive_overview.md](comprehensive_overview.md) owns the story and curriculum, [game_rules.md](game_rules.md) owns money and progression, and [visual_novel_design.md](visual_novel_design.md) owns chapter structure. Screens and assets should satisfy all three contracts.
 
+Implementation uses Godot 4.x standard GDScript and the Compatibility renderer. The elevated appearance is layered 2D artwork; the game uses no 3D movement or 3D camera. Project scenes, scripts, content, resources, assets, and tests live under `game/`.
+
 ## 1. Reference interpretation
 
 The user likes the pixelated 2.5D look of Pokémon Black and White. The design direction comes from the supplied screenshots; the following observations describe their visible composition rather than the original game's implementation.
@@ -52,6 +54,8 @@ Use a fixed angled overhead view with a rectangular logical ground grid. Streets
 
 The first implementation creates the 2.5D appearance using layered pixel sprites and pre-authored perspective. No perspective rotation is required. A change in camera angle would require matching asset variants and a separate rendering decision.
 
+Each level is a `Node2D` scene. Use `TileMapLayer` for ground and decorative tiles, and a dedicated `Node2D` with `y_sort_enabled = true` for buildings, trees, NPCs, and the player. Place sprite origins at ground-contact feet. Building façade, roof canopy, and foreground fragments may use separate nodes so their overlap remains intentional. Footprint collision belongs to the building base, not its painted roof. Labels and pins use a separate presentation layer above world artwork; the HUD and modal screens belong to a `CanvasLayer`.
+
 Starting projection for a flat logical map:
 
 ```text
@@ -79,6 +83,16 @@ Characters share the environment's perspective and sit on a small pixel shadow a
 ### Camera behavior
 
 Start each level with home or its equivalent starting location visible and a clear route to the first story lead. Follow the avatar gently within map bounds. Permit bounded pan; provide a recenter control after manual pan. The standard view uses a fixed pixel scale. If zoom is offered, use discrete scale steps and preserve pixel edges. Dialogue screens do not inherit overworld pan or zoom.
+
+Implement world follow with `Camera2D` and explicit map limits. Establish a 480 × 320 logical world-art viewport, displayed at integer nearest-filtered scales, with 960 × 640 as the initial desktop window. Use a world `SubViewport` when necessary to isolate pixel scaling from the readable `Control` UI. Letterbox unused space at strict integer scales. Fractional fill scaling is an optional device tradeoff: it can produce uneven pixel widths even with nearest filtering, so compare it against integer letterboxing on target phones. Reflow UI in its own canvas at window resolution; never shrink dialogue text into the low-resolution world viewport. Portrait shortens the world/stage area and reserves readable space for controls.
+
+### Playable movement and interactions
+
+The player is a `CharacterBody2D` with an `AnimatedSprite2D`, a small foot-level `CollisionShape2D`, and four directional idle/walk animations. Map `move_up`, `move_down`, `move_left`, and `move_right` to W/A/S/D and arrow keys in `InputMap`. Read a normalized directional vector in `_physics_process`, set `velocity`, and call `move_and_slide()`; diagonal movement must not be faster. Retain the last nonzero facing direction when standing. Godot's [2D movement guide](https://docs.godotengine.org/en/stable/tutorials/2d/2d_movement.html) provides the engine pattern.
+
+Entrances use `Area2D` proximity zones. E opens the eligible nearby building chapter; a visible prompt names that building. Static footprint collisions keep the avatar outside walls while leaving every entrance reachable. Building taps/clicks and the building list offer the same chapter without demanding precise walking. Optional ground-tap routing requires a tested walkable navigation route around footprints; it must not teleport through buildings.
+
+Enter/Space confirms dialogue, number keys 1/2/3 choose visible options, Escape closes a dismissible overlay or pauses, and J opens the journal. `TouchScreenButton` directional controls or responsive `Control` buttons reuse the same actions on phones. Visual novel mode disables world movement, clears held movement actions and velocity, and gives focus to its active controls. Release actions on lost focus, modal entry, and scene switches; a held key must never move the player behind a chapter. Leaving a modal must not replay the input that opened it.
 
 ## 5. Pixel art production rules
 
@@ -152,6 +166,8 @@ Avoid tinting an entire level red or green based on a weight. Earlier decisions 
 
 Every building opens a dedicated visual novel screen. Maintain the building's identity through an interior background and its recurring characters. The chapter must feel like entering a scene, with people reacting to a situation and inviting a decision.
 
+Build this presentation as a `CanvasLayer` with a full-screen `Control` root. A `TextureRect` supplies the pixel interior; staged character `TextureRect` nodes or an isolated 2D stage supply larger sprites and expressions. A `MarginContainer` and `VBoxContainer`/`HBoxContainer` arrangement owns the bottom dialogue, `RichTextLabel`, speaker label, inspectable object, and choice `Button` controls. Use anchors, minimum sizes, container layout, focus neighbors, and scrollable history instead of absolute-positioning every label. World physics stays inactive throughout this scene. Scene resources reference authored beat IDs and financial engine results; UI nodes never calculate money.
+
 ### Scene stage
 
 Use the last reference's depth-separated staging as inspiration. The player can occupy the foreground left, seen from behind or at a three-quarter angle. The NPC sits or stands farther right at a counter, desk, workbench, or conversation space. A financial object occupies the relevant focal area: grocery basket, passbook, receipt, payslip, calendar, goal board, or message screen. Two conversational characters can share the stage when the story requires them.
@@ -190,8 +206,8 @@ Use a readable English font for body text and monetary amounts, including the ru
 
 Starting mobile design targets:
 
-- Body dialogue at approximately 16–18 scalable pixels, increasing with system text size.
-- Touch targets at least 48 logical device pixels even when the pixel icon inside is small.
+- Body dialogue at approximately 16–18 UI pixels, increasing with the game's explicit text-size setting. Godot themes and font sizes must be tested against device scale; do not assume operating-system font scaling automatically applies.
+- Touch targets at least 48 logical UI pixels at the validated device scale even when the pixel icon inside is small.
 - Short dialogue beats that generally fit two to four lines at the default layout; allow reflow rather than truncation.
 - Two or three choice buttons with full meaningful labels. Avoid hidden costs or abbreviations that require guessing.
 - A speaker name and clear continuation cue. Tapping during optional text reveal completes the current line; the next intentional tap advances. A completed transaction never runs again because of repeated taps.
@@ -267,7 +283,7 @@ Inside the visual novel, use expression changes, a small gesture toward a receip
 Keep production assets in a project-owned asset directory when implementation begins. The source inspiration remains in `design_references/` within this project directory. These references are for design review and are not shipped as game assets.
 
 ```text
-assets/
+game/assets/
   town/tiles/
   town/buildings/
   town/props/
@@ -277,11 +293,16 @@ assets/
   interiors/
   objects/finance/
   ui/
-content/
+game/content/
   maps/
   chapters/
   text/
 design_references/
+game/scenes/
+game/scripts/
+game/resources/
+game/tests/
+contracts/
 ```
 
 Use predictable IDs such as `l1_kirana_exterior_base`, `l1_kirana_awning_foreground`, `kirana_interior_day`, `shopkeeper_stage_thoughtful`, and `object_passbook`. Metadata declares native dimensions, ground anchor, layer, footprint, hit area, expression/direction/frame, alternative text key, and content version. Distinguish map sprites from larger staged character art.
@@ -303,8 +324,8 @@ Example starting design tokens:
     "landscapeStageShare": 0.64,
     "dialogueSurface": "paper",
     "dialogueInk": "ink",
-    "minimumTouchTargetDp": 48,
-    "defaultBodyTextSp": 18,
+    "minimumTouchTargetUiPixels": 48,
+    "defaultBodyFontSize": 18,
     "textRevealSkippable": true
   }
 }
@@ -316,13 +337,13 @@ Tokens are initial design settings. Chapter layout must adapt when text size or 
 
 Pocket Town uses English only for story dialogue, UI, signs, captions, and optional narration. Keep all essential copy in stable English text records so content stays separate from game logic. Dialogue panels expand with text. Financial data tables use readable labels, the rupee symbol, and logical reading order. Use a body font that remains legible at large text settings.
 
-Screen-reader order follows the scene description, active speaker, dialogue, inspectable objects, choices, and consequence. Provide alternative text for the basket, changed receipt, calendar, or character gesture when it carries information. A portrait expression alone must not decide whether an offer is suspicious.
+Desired assistive reading order follows the scene description, active speaker, dialogue, inspectable objects, choices, and consequence. Verify actual screen-reader availability and exposure of `Control` nodes on each pinned Godot version and exported platform before claiming support. The building list, keyboard focus, text descriptions, readable history, and optional English narration remain independent usability routes. Provide text descriptions for the basket, changed receipt, calendar, or character gesture when it carries information. A portrait expression alone must not decide whether an offer is suspicious.
 
 Support larger text, reduced motion, captions, audio off, skip text reveal, and a building list. Ensure scene navigation and choices remain accessible in both landscape and portrait. Do not time a financial decision or require a rapid tap.
 
 ## 18. Rendering and performance review
 
-The renderer must preserve pixel edges, correct foot anchors, consistent sprite scale, and readable native UI. Group suitable sprites into atlases, load by level, cull offscreen objects, and avoid rebuilding the entire scene for a character animation frame. Use the first playable neighborhood and interior to measure frame rate, memory, load time, and battery behavior on the actual target devices before fixing budgets.
+Use the Godot Compatibility renderer across the initial Windows, Android, and optional Web targets. Set nearest texture filtering on world and stage pixel assets, enable appropriate pixel snapping, and keep high-resolution fonts and UI in a separate readable canvas. Group suitable sprites into atlases, load resources by level, and animate existing `AnimatedSprite2D` nodes rather than recreating scenes each frame. Use the first playable neighborhood and interior to measure frame rate, memory, load time, and battery behavior on actual target devices before fixing budgets.
 
 A building chapter and its required assets should be available offline. Save the current dialogue beat and committed decision ID against the active branch, snapshot, and content version so interruption does not repeat a transaction. Commit the post-choice beat with its financial result, and replace it with the recomputed checkpoint when a repair activates a new branch. Scene effects and UI animation observe the financial engine result; they do not compute it independently.
 
@@ -345,3 +366,5 @@ A building chapter and its required assets should be available offline. Save the
 - All seven levels follow the same art and interaction rules while retaining their distinct landmarks and concept ladder.
 - English labels, choices, amounts, and pixel art remain usable on target devices in both supported orientations.
 - All design documents and the four inspiration images are stored within this project directory and use valid local links.
+- W/A/S/D, arrow keys, mobile movement controls, entrance E, and direct building selection work; collisions, normalized speed, focus loss, and visual novel movement locking pass.
+- Each phase ends with an actual running Godot preview: Phase 0 shows the foundation, and Phases 1–7 each show the next full level plus all previous-level regressions. Run the scene with F6 and the integrated project with F5; save build/commit, target, route, balances, screenshots or recording, and issue status in the planned `previews/phase-XX.md`. Exported-device checks supplement editor previews. These are future evidence requirements, not a claim that Godot implementation is already complete.

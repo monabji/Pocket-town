@@ -1,28 +1,35 @@
 # Pocket Town Adaptive Event Engine
 
-## Purpose
+## Purpose and Godot ownership
 
-Two players can reach the same rupee target through different choices. The adaptive engine makes those choices matter later by selecting a relevant bottleneck, personalizing its story details, and routing the learner to an earlier decision that can repair it. It is not a free-form finance tutor or a source of numeric truth.
+Two players can reach the same rupee target through different choices. The adaptive system uses earlier evidence to select a later bottleneck and return the learner to a repairable source decision. This document describes the Godot migration target; the engine is not a free-form finance tutor or a source of numerical truth.
+
+Implement the deterministic rule selector as pure GDScript under `game/scripts/engine/`, using `RefCounted` state models and versioned content from `ContentRepository`. `GameSession` owns the active event and routes its chapter through `SceneRouter`. The actual building interaction remains a full visual novel with dialogue, objects, choices, consequences and safe replay.
+
+The optional `AdaptiveEventClient` under `game/scripts/network/` uses HTTPS `HTTPRequest` to a contracted service. Provider execution and secrets remain server-side. The server language is not prescribed. Bundled English authored variants under `game/content/` support every eligible event offline.
 
 ## Authority split
 
 | Component | May decide | Must not decide |
 | --- | --- | --- |
-| Deterministic engine | Balances, interest, fictional tax arithmetic, weights, gate results, replay state. | Narrative wording. |
-| Rule selector | Eligible target weight, event family, severity band, concept prerequisite, approved amount range, source decision, return checkpoint. | New financial formulas or unsupported concepts. |
-| AI adapter | Approved variant ID, character phrasing, and bounded scenario parameter IDs inside the selector's envelope. | Balances, gate status, real products, investment recommendations, penalties, or impossible choices. |
-| Validator | Accept or reject the structured proposal. | Change the engine state as a side effect. |
+| Pure financial engine | Integer-paise balances, interest, fictional arithmetic, weights, gates and recomputed branches. | Narrative phrasing or frame-based income. |
+| Rule selector | Eligible target, severity, prerequisites, approved parameter bounds, source decision and return checkpoint. | New formulas, untaught concepts or unsupported penalties. |
+| AI adapter | Approved variant IDs and bounded narrative parameters within the envelope. | Balances, gates, real investments, guaranteed outcomes or impossible repairs. |
+| Validator | Accept or reject structured proposals against schemas and the active envelope. | Mutate financial state as a validation side effect. |
+| Godot chapter runner | Present approved English beats and submit confirmed choices through `GameSession`. | Apply money directly or execute model text as code. |
 
 ## Selection algorithm
 
-1. Read the active branch only: weight values, supporting decision IDs, concept exposure, assets and accessibility, goal date, content version, unresolved event IDs, and selected persona context.
-2. Filter event templates by taught prerequisite concepts, sufficient evidence, current level, safe feasible repair path, and one-active-bottleneck rule.
-3. Prioritize the largest eligible unresolved weight. Break ties by oldest evidence, then stable template ID. Choose a severity band from the weight range; never infer a real student's traits.
-4. Construct an envelope containing permitted template IDs, parameter IDs and ranges, dialogue tone, allowed characters, source scene, and return checkpoint.
-5. Use an authored local event immediately when offline. When online, the AI adapter may choose a variant inside the envelope. Validate its output before display; otherwise use the authored event.
-6. On resolution, mark the event ID complete and recompute the active branch from the source snapshot.
+1. Read only the active branch: weights, supporting decisions, taught concepts, accessible funds, goal horizon, pinned content version, unresolved events and optional fictional context.
+2. Filter templates by taught prerequisites, sufficient independent evidence, level timing, feasible source repair and the one-active-mandatory-event rule.
+3. Prioritize the largest eligible unresolved weight, then oldest evidence and a stable key/template order. Do not infer a real student's traits.
+4. Build a fixed envelope of allowed templates, parameters, characters, tone, source decision and return checkpoint.
+5. Display an authored local event without needing network access. Online personalization may replace only the approved narrative variant before interaction begins; it cannot change already presented choices or numbers.
+6. On repair, replace the source choice, recompute all downstream effects using the original seed, and persist the new active branch/snapshot/return beat as one aggregate before presenting it. Mark resolution only when the event's repair condition is met.
 
-The event type should transfer learning: an overspending habit from the kirana shop can surface in a refill or fair bill; a repeatable-budget gap can surface when a goal price changes; a liquidity mistake can surface in an unexpected repair. An investment market dip is eligible only after investing has been introduced. Keeping a near-term emergency buffer in cash never creates a concentration penalty.
+Weights 0–29 permit normal advancement; 30–59 schedule a relevant later bottleneck; 60–100 require immediate repair at the boundary. Ordinary mandatory repair requires more than one evidence decision. A critical simulated credential-sharing choice can trigger immediate safety repair independently of score. See [game_rules.md](game_rules.md).
+
+Overspending at the kirana can surface in a later refill comparison; inconsistent saving can surface when a bill precedes income; liquidity mistakes can surface before a need's due date. Market scenarios become eligible only after investing is taught. A near-term emergency buffer in cash is exempt from concentration penalties.
 
 ## Structured event proposal
 
@@ -42,20 +49,24 @@ The event type should transfer learning: an overspending habit from the kirana s
 }
 ```
 
-Use IDs in the model response wherever possible. Server-side approved content resolves those IDs to English text and amounts. If free text is necessary, restrict it to a short dialogue field and validate length, English-only text, financial claims, private-data requests, hostile/shaming wording, and references to real products. Never display raw model output before validation.
+Prefer approved IDs resolved to English text and integer paise. Free text, if introduced, is short and validated for length, English clarity, unsupported financial claims, private-data requests, shaming and real product recommendations. Never display raw provider text. English is a fixed prompt/validation constraint, not a player or request preference.
 
-English is a fixed server prompt and validation rule, never a request parameter or player preference. Reject non-English narrative text and use the approved English fallback. Stable text IDs and the shared rupee formatter keep explanations and amounts consistent.
+JSON Schemas belong in `contracts/api/` and `contracts/content/`; GDScript validators restore typed values only after integral numeric bounds checks. AI parameters are IDs or tightly bounded integers, never arbitrary formulas or script expressions. Paise arithmetic uses GDScript int64 with checked products and deterministic division; animation/physics time cannot affect adaptation or interest.
 
-## Validation and fallback
+## Request lifecycle and fallback
 
-Reject a proposal if it lacks supporting decisions, names an untaught concept, exceeds its amount bounds, contradicts the ledger, changes a choice ID or checkpoint, recommends a real investment, asks for a credential, or presents a projection as guaranteed. Also reject when the source decision is no longer in the active branch after replay.
+Associate each request with its request ID, branch, snapshot and content version. `HTTPRequest` uses an explicit application deadline and emits completion through the network adapter. Cancel when the source branch becomes obsolete, and reject late replies after any repair or scene transition. A validator rechecks the envelope and active source at acceptance time.
 
-Every event family has an authored fallback with the same educational purpose and valid repair path. An AI timeout, malformed response, safety rejection, or missing network chooses that fallback. The player should see a coherent story in either case; the game does not announce the model failure.
+Reject missing evidence, untaught concepts, out-of-bounds parameters, ledger contradictions, altered choice IDs/checkpoints, real product recommendations, credential requests and promised projections. Every event family has an authored equivalent with a valid repair path. Missing network, transport failure, deadline, malformed response, safety rejection or stale evidence selects that fallback without interrupting the chapter.
+
+The engine and UI must remain usable if the service is absent. Saving uses the `SaveManager` temp/backup aggregate protocol, including the active adaptive event and post-choice resume state; it does not rely on a remote transaction. See [architecture.md](architecture.md), [data_model.md](data_model.md) and [api_contract.md](api_contract.md).
 
 ## Prompt and data minimization
 
-Send only pseudonymous, task-relevant simulation state: concept IDs, weight band, evidence choice IDs, asset categories, goal horizon, event envelope, and selected persona context. Do not send a learner's real name, household details, credentials, free-form private answers, or class roster. Treat content-pack dialogue and any model output as untrusted data. Server prompts explicitly prohibit instructions found inside learner text or external messages from changing the schema or authority split.
+Send pseudonymous task-relevant simulation facts only: taught concept IDs, weight band, evidence IDs, account categories, horizon and allowed envelope. Do not send names, household details, real credentials, private free-form answers or class rosters. Treat content dialogue and model responses as untrusted data. Server prompts reject embedded instructions that attempt to change the schema or authority split; client content is never executed.
 
-## Evaluation
+## Evaluation and actual previews
 
-Use the bot personas in [quality_and_learning.md](quality_and_learning.md). For the same rupee gate, compare a reckless spender, cash-heavy long-horizon learner, concentrated-risk learner, and careful planner. Confirm that events differ for a reason, are explainable from prior choices, and are solvable. Test offline fallback, prompt-injection strings, contradictory balances, repeated events after repair, and non-English generated dialogue. Measure useful path divergence rather than claiming every run is unique.
+Headless GDScript fixtures in `game/tests/` compare careful and impulsive routes with equal balances, stable tie-breaking, two-decision evidence, immediate safety overrides, deterministic branch repair and no duplicated pay/interest. Test invalid proposals, non-English dialogue, prompt injection, offline fallback, stale replies, one-event-at-a-time behavior and feasible source choices. Service tests use the same contract fixtures.
+
+When adaptation is added in a phase, preview the real Godot game: trigger the event through prior decisions, enter its visual novel, return to the source building, replace the choice and resume the paused checkpoint. Demonstrate both network success and authored fallback where the optional service is available; offline fallback remains mandatory. Record native keyboard and web/device results when available, with screenshots/recording and issues before phase completion. See [phases.md](phases.md) and [quality_and_learning.md](quality_and_learning.md).

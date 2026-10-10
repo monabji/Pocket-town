@@ -1,6 +1,6 @@
 # Pocket Town Delivery Phases
 
-These are dependency-based phases, not calendar estimates. The game is English-only: UI, building signs, visual novel dialogue, choices, financial objects, captions, facilitator views, and optional narration use English. Indian settings and rupee examples remain central.
+These are dependency-based phases for a Godot 4 project written in GDScript, not calendar estimates. The game is English-only: UI, building signs, visual novel dialogue, choices, financial objects, captions, facilitator views, and optional narration use English. Indian settings and rupee examples remain central. Use the Compatibility renderer and layered 2D scenes for the pixelated 2.5D world. Project configuration and migration steps are in [godot_setup.md](godot_setup.md) and [godot_migration.md](godot_migration.md).
 
 Phase 0 establishes a runnable foundation. Phases 1–7 each add one complete level to the financial concept ladder. Reuse the existing engine, renderer, and earlier concepts as the town grows. Every phase ends with a preview of the actual integrated game and recorded verification before work advances to the next phase.
 
@@ -21,14 +21,14 @@ The exact building inventory, narrative beats, and gate definitions are governed
 
 ## Mandatory preview after every phase
 
-The coordinator must boot the current integrated app and preview it after every phase, including Phase 0. Do not mark a phase complete using only unit tests, static screenshots, unconnected mockups, or individual subagent handoffs.
+The coordinator must run the current integrated Godot game and preview it after every phase, including Phase 0. Use F5 for the full game, not only F6 for an isolated scene. Do not mark a phase complete using only headless tests, static screenshots, unconnected mockups, or individual subagent handoffs.
 
-1. Run the current build on the agreed Android target or supported runnable preview environment. Record the commit, build identifier, target/device, and launch steps.
+1. Run the current Godot build in the editor or Windows export and verify the Android export on an available target when the phase changes mobile behavior. If browser delivery is in scope, serve and run the Godot web export over localhost or HTTPS. Record the commit, Godot version, matching export-template version, content version, target/device, and launch steps. Record an unavailable platform as unverified rather than inventing a pass.
 2. Walk the newly delivered map and enter every required building. Verify each entrance opens its full visual novel presentation: interior background, staged characters, speaker and expression, bottom dialogue panel, choices, financial objects, consequences, and reflection. Check reachable entrances, depth sorting, pixel clarity, and readable English.
 3. Play a safe completion route through the new level. Check ledger amounts, weight evidence, the money goal, progression gate, and next-level unlock when that next level is implemented. Show a clear completion state when it is not yet available.
 4. Exercise a different decision branch, save/resume, and offline play. From Phase 3 onward, demonstrate an eligible bottleneck, the exact earlier source-choice repair, recalculation, and return to the current chapter without duplicate rewards.
 5. Recheck earlier completed levels. Run the golden completion route and targeted checks for any changed shared engine, UI, content, or service behavior; cover all previous levels rather than assuming they still work.
-6. Inspect map and visual novel screens on supported orientations, with large text and captions. Confirm choices remain tappable and financial information is not clipped or hidden.
+6. Check WASD, arrow keys, normalized diagonal speed, collisions, E proximity interaction, touch controls, tap navigation, and direct building selection. Confirm movement stops during visual novel chapters, overlays, and focus loss. Inspect map and visual novel screens on supported orientations, with large text and captions; choices and financial information remain usable.
 7. Capture screenshots or a short recording from the real running build. Share the preview and, when available, its playable URL or device build with the user. Record evidence in `previews/phase-XX.md`, with media in `previews/phase-XX/`: build/commit, target, levels and routes, expected versus observed results, evidence links, defects, and fixes.
 8. Resolve defects that block the phase exit, rerun affected preview steps, then mark the phase complete. Continue authorized implementation after verification; the preview is a delivery gate, not an automatic request for approval.
 
@@ -36,17 +36,17 @@ These evidence paths are created during implementation. Do not fabricate preview
 
 ## Phase 0 — Runnable foundation and agreed contracts
 
-**Build:** Initialize the React Native/Expo app, a small angled overhead 2.5D starter map, avatar movement or accessible tap navigation, a reachable home entrance, and a short English home introduction in the visual novel runner. Establish pixel scaling, asset anchors, depth order, staged interior, dialogue panel, and basic local resume. Agree on the seven-level curriculum, integer money units, ledger categories, five weights, scene schema, and event envelope. Create deterministic fixtures for the ₹100 savings gate, ₹1,000 earned-income gate, and a later source-choice repair.
+**Build:** Create `game/project.godot` with the stable Godot 4 standard editor, GDScript, Compatibility renderer, and matching export templates. Record the exact version. Build `Main.tscn`, a `Node2D` starter town with `TileMapLayer` terrain and Y-sorted sprites, a `CharacterBody2D` player with collision, `Area2D` building entrances, and a `Camera2D`. Configure Input Map actions for WASD/arrows, E, dialogue confirm, numbered choices, Escape, journal, and touch controls. Wire the reachable home to a short English `Control` visual novel chapter. Establish nearest-filtered pixel art, responsive native UI, staged characters, and a versioned local save using `FileAccess` under `user://`. Agree on the curriculum, integer money units, ledger categories, five weights, scene schema, and event envelope. Port the numerical fixtures for the ₹100 savings gate, ₹1,000 earned-income gate, and later source-choice repair into the headless Godot test runner.
 
-**Deliverables:** Runnable app scaffold; versioned shared interfaces and JSON Schemas; initial assets and chapter fixture; feasible money paths for all seven levels; synchronized governing docs. This starter chapter introduces the family and grocery errand, but does not claim to deliver full Level 1.
+**Deliverables:** Runnable Godot project and export presets; typed GDScript interfaces and versioned JSON contracts; initial imported assets and chapter fixture; headless test runner; feasible money paths for all seven levels; synchronized governing docs. This starter chapter introduces the family and grocery errand, but does not claim to deliver full Level 1.
 
-**Preview:** Launch the app, move through the starter map, enter home, read the staged introduction, select a sample choice, return to the map, and reopen the saved beat. Inspect the real pixel map and interior on the target screen.
+**Preview:** Run the Godot game with F5, move through the starter map using WASD/arrows and touch, test wall collisions and E interaction, enter home, read the staged introduction, select a sample choice, return to the map, and reopen the saved beat. Confirm movement is disabled while reading. Inspect the real pixel map and interior on the target screen and smoke-test the configured exports.
 
 **Exit:** The preview works. Independent calculations agree on fixture balances, weight changes, and gates. Every future level has a safe feasible numerical path. Map-to-building-to-chapter and engine command/result contracts are ready for parallel work.
 
 ## Phase 1 — Complete Level 1: Grocery List
 
-**Build:** Finish the home, kirana, vegetable stall, bus-stop interaction, and savings visit required by Level 1. Every building opens a complete visual novel chapter. Implement household errand money versus personal money, earning, spending, essential groceries, needs versus wants, change and receipts, personal saving, reflection, and replay. Add deterministic ledger commands, weight evidence, gate evaluation, and atomic decision/snapshot/beat persistence. Introduce authored follow-up visits and safe recovery from overspending.
+**Build:** Finish Level 1 as a Godot town scene/resource pack: home, kirana, vegetable stall, bus-stop interaction, and savings visit. Every building opens the shared `VisualNovel.tscn` chapter runner with interior, characters, dialogue, objects, and choices. Implement household versus personal money, earning, spending, groceries, needs/wants, receipts, saving, reflection, and replay in the pure GDScript engine. Add ledger commands, weight evidence, gate evaluation, and a single versioned decision/snapshot/beat save aggregate with temporary-file validation and backup recovery. Introduce authored follow-up visits and safe recovery from overspending.
 
 **Preview:** Begin at home, compare shopping choices, complete the necessary groceries, return home, earn or preserve personal money, and save ₹100. Show one overspending branch and its recovery, the ledger, and the completion state. Recheck the Phase 0 launch and resume path.
 
@@ -70,7 +70,7 @@ These evidence paths are created during implementation. Do not fabricate preview
 
 ## Phase 4 — Complete Level 4: Prices Move and bounded AI
 
-**Build:** Add the complete Level 4 market, household-budget, price-comparison, and goal-planning chapters. Introduce inflation through changed prices and purchasing power, reuse earlier budgets, and deliver the ₹1,500 revised goal fund. Add the Node.js API, rule-selected adaptive event service, bounded AI adapter, English/schema validator, and authored fallback. The engine alone owns money, weights, time, replay, and gates. Validated AI may personalize context and explanation within eligible authored constraints.
+**Build:** Add the complete Godot Level 4 market, household-budget, price-comparison, and goal-planning chapters. Introduce inflation through changed prices and purchasing power, reuse budgets, and deliver the ₹1,500 revised goal fund. Add GDScript `HTTPRequest` adapters for the optional HTTPS API, rule-selected adaptive service, bounded AI responses, English/schema validation, and authored fallback. The service implementation is separate from the Godot client; its language is not prescribed by the game brief. Keep provider credentials server-side. The engine alone owns money, weights, time, replay, and gates. Validated AI may personalize context and explanation within eligible authored constraints.
 
 **Preview:** Play the new price-change route, compare old and revised baskets, adjust the plan, and reach ₹1,500. Show two equal-money histories receiving appropriate different eligible events. Demonstrate a valid AI response plus invalid, timed-out, non-English, and offline responses resolving to playable English authored fallbacks. Recheck Levels 1–3 and their repair paths.
 
@@ -78,7 +78,7 @@ These evidence paths are created during implementation. Do not fabricate preview
 
 ## Phase 5 — Complete Level 5: Lock or Keep Ready and durable progress
 
-**Build:** Add the complete savings-choice, fictional fixed-deposit, time-horizon, household-need, and comparison chapters. Introduce simple versus compound growth using explicit rates and simulated periods, and the trade-off between locking money and keeping an accessible buffer. Deliver the ₹2,500 funds-plus-buffer gate as defined in the rules. Complete PostgreSQL persistence, idempotent sync, version checks, active-branch handling, and recovery from interrupted saves without requiring connectivity for play.
+**Build:** Add the complete Godot savings-choice, fictional fixed-deposit, time-horizon, household-need, and comparison chapters. Introduce simple versus compound growth using explicit rates and simulated periods, and the trade-off between locking money and keeping an accessible buffer. Deliver the ₹2,500 funds-plus-buffer gate. Complete SaveManager recovery, content/save version checks, active-branch handling, and the GDScript idempotent sync queue. The optional server persists pseudonymous backup and event history in PostgreSQL. Test interrupted native writes and browser storage limitations separately; connectivity is never required for native gameplay.
 
 **Preview:** Compare keeping money accessible with a fixed-term deposit, inspect the growth illustration and assumptions, experience a later expense, repair an eligible liquidity decision, and meet the ₹2,500 gate. Resume after interruption and exercise offline play followed by sync. Recheck Levels 1–4, especially branch recomputation and event fallback.
 
@@ -86,7 +86,7 @@ These evidence paths are created during implementation. Do not fabricate preview
 
 ## Phase 6 — Complete Level 6: First Pay Slip and NGO delivery
 
-**Build:** Add the complete simulated-workplace, payslip, shop/stall, receipt, and payment-verification chapters. Reuse income and budgeting; add gross/net pay, illustrative deductions, GST receipt examples, revenue versus profit, and safe UPI verification. Deliver cumulative verified ₹3,500 inflows with the required ledger reconciliation. Add large text, captions, optional English narration, shared-device session separation, class codes, and an aggregate facilitator progress view. Review age context and student privacy for NGO delivery.
+**Build:** Add the complete Godot simulated-workplace, payslip, shop/stall, receipt, and payment-verification chapters. Reuse income and budgeting; add gross/net pay, illustrative deductions, GST receipt examples, revenue versus profit, and safe UPI verification. Deliver cumulative verified ₹3,500 inflows with ledger reconciliation. Add a shared Godot `Theme` for large text, captions, optional English narration through `AudioStreamPlayer`, shared-device session separation, class codes, and a facilitator `Control` scene for aggregate progress. Verify keyboard focus and target-platform accessibility support. Review age context and privacy for NGO delivery.
 
 **Preview:** Read a payslip, reconcile net money, distinguish sales from profit, inspect a fictional tax receipt, verify a payment, and meet the ₹3,500 gate. Show a verification failure and safe retry. Run a facilitator-led English session, pause for discussion, switch student sessions safely, and inspect aggregate support needs. Recheck Levels 1–5 and accessibility in their chapters.
 
@@ -115,14 +115,14 @@ Each assignment names exact files or directories. One agent owns a file at a tim
 | Workstream | Assigned ownership | Required handoff |
 | --- | --- | --- |
 | Coordinator/contracts | Shared types, schema versions, manifests, app wiring, integration | Contract version, fixtures, assignment list, running phase build and preview evidence |
-| Financial engine | `packages/engine/` ledger, time, weights, gates, replay and tests | Deterministic results, feasible level goals, no duplicate rewards |
-| Town renderer | Assigned map/navigation modules in `apps/mobile/` | 2.5D projection, anchors, depth order, reachable entrances and device evidence |
-| Visual novel renderer | Assigned chapter UI modules in `apps/mobile/` | Staged interiors, dialogue, expressions, choices, objects, consequences and resume |
-| Art/authored content | Separate assigned level packs or asset families | Original assets, English text keys, stable IDs, prerequisites, repairs and validated chapters |
-| API/adaptive service | Assigned `apps/api/` and client adapter modules | Contract-compatible API, bounded English events, fallbacks, migrations and sync evidence |
-| QA/delivery | Separate test suites, reports or facilitator modules | Reproducible findings and checks against [quality_and_learning.md](quality_and_learning.md) |
+| Financial engine | `game/scripts/engine/` and assigned `game/tests/` fixtures | Deterministic GDScript results, feasible goals, no duplicate rewards |
+| Town renderer | Assigned `game/scenes/world/`, `game/scenes/player/`, `game/scenes/buildings/`, and matching scripts | 2.5D projection, collisions, Input Map movement, anchors, Y-sort, reachable entrances and device evidence |
+| Visual novel renderer | Assigned `game/scenes/visual_novel/`, matching scripts, and chapter UI resources | Staged interiors, dialogue, expressions, choices, objects, consequences and resume |
+| Art/authored content | Separate level packs in `game/content/` and assigned `game/assets/` families | Original imported assets, English text keys, stable IDs, prerequisites, repairs and validated chapters |
+| API/adaptive service | Assigned `services/` modules and `game/scripts/network/` adapters | JSON-contract-compatible service, bounded English events, fallbacks, migrations and sync evidence |
+| QA/delivery | Separate `game/tests/` suites, reports, export checks, or facilitator `Control` modules | Reproducible findings and checks against [quality_and_learning.md](quality_and_learning.md) |
 
-Paths follow [architecture.md](architecture.md). During documentation work, assign exact Markdown files with the same ownership rule. Avoid concurrent changes to an asset manifest or shared dependency file.
+Paths follow [architecture.md](architecture.md). During documentation work, assign exact Markdown files with the same ownership rule. Assign `project.godot`, `export_presets.cfg`, shared `.tscn` scenes, autoload registration, resource manifests, and contract files to one owner each. Agents must not save the same scene in different editor instances. Commit source `.uid` files with scripts; keep the generated `.godot/` cache out of Git.
 
 ### Interface agreement in Phase 0
 

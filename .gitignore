@@ -8,6 +8,13 @@ dist/
 build/
 coverage/
 
+# Godot editor cache, local export output and signing credentials
+.godot/
+exports/
+export_credentials.cfg
+*.keystore
+*.jks
+
 # Local environment configuration
 .env
 .env.*

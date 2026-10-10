@@ -1,8 +1,14 @@
 # Pocket Town Project Documents
 
-Pocket Town is a mobile financial decision game for students in Grades 11 and 12 in India. The player explores seven pixelated 2.5D neighborhood maps. Every building opens a visual novel chapter with illustrated locations, character dialogue, branching decisions, and visible financial consequences. These chapters carry the main learning experience and link visits across the town. All money and products in the game are simulated.
+Pocket Town is a financial decision game built in Godot 4 with GDScript for students in Grades 11 and 12 in India. Windows and Android are the primary playable targets, with a Godot web export for browser demonstrations. The player explores seven pixelated 2.5D neighborhood maps. Every building opens a visual novel chapter with illustrated locations, character dialogue, branching decisions, and visible financial consequences. These chapters carry the main learning experience and link visits across the town. All money and products in the game are simulated.
 
-The game uses English throughout its interface, dialogue, signage, captions, and optional narration. Phases 1–7 each deliver the next complete level; every phase requires an actual runnable game preview and recorded verification before work advances.
+The game uses English throughout its interface, dialogue, signage, captions, and optional narration. Explore with WASD or arrow keys, press E at a doorway, or use touch controls and direct building selection. Phases 1–7 each deliver the next complete level; every phase requires an actual running Godot game preview and recorded verification before work advances.
+
+## Godot implementation target
+
+The authoritative implementation is a standard GDScript Godot project at `game/project.godot`, using the Compatibility renderer and layered 2D scenes to create the 2.5D look. Open that project in the matching stable Godot 4 editor and use F5 to run the game. Phase 0 creates this project; this documentation update does not claim that a Godot build already exists. The earlier React Native prototype is superseded. Its authored content and numerical fixtures can inform the port, but its runtime and tooling are not the execution plan.
+
+Start with [godot_setup.md](godot_setup.md) for editor, Input Map, scenes, exports, and commands, then use [godot_migration.md](godot_migration.md) to port existing material and verify parity.
 
 ## Read in this order
 
@@ -17,6 +23,8 @@ The game uses English throughout its interface, dialogue, signage, captions, and
 | [ui_flow.md](ui_flow.md) | What screens and interactions must the player experience? |
 | [ai_event_engine.md](ai_event_engine.md) | How are player-specific bottlenecks selected and safely personalized? |
 | [architecture.md](architecture.md) | What runs on the device and server, and how do the pieces communicate? |
+| [godot_setup.md](godot_setup.md) | How are the Godot editor, scenes, controls, exports, and local checks configured? |
+| [godot_migration.md](godot_migration.md) | How do the earlier prototype's content and rules become a verified Godot implementation? |
 | [data_model.md](data_model.md) | What data is stored, synced, and shown to facilitators? |
 | [api_contract.md](api_contract.md) | What messages and error cases connect the app and server? |
 | [localization_and_delivery.md](localization_and_delivery.md) | How do English content, accessibility, devices, and NGO classrooms work together? |
@@ -31,6 +39,7 @@ The game uses English throughout its interface, dialogue, signage, captions, and
 - `content_authoring.md` owns the scene format and content constraints.
 - `ai_event_engine.md` owns adaptive event selection and generation boundaries.
 - `architecture.md` and `data_model.md` own implementation interfaces and storage.
+- `godot_setup.md` owns Godot project configuration; `godot_migration.md` owns the port and parity checklist.
 - If these disagree, record the decision in the relevant file and update links and examples in the others before implementation.
 
 ## First playable milestone

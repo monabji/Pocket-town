@@ -2,7 +2,9 @@
 
 ## Content model
 
-The seven pixelated 2.5D maps and building interactions live in versioned JSON content packs, not hard-coded screen components. A pack contains logical map geometry, layered sprite assets, building footprints and entrances, scenes, choices, ledger effects, concept tags, English text keys, illustrative financial assumptions, and authored adaptive-event fallbacks. The renderer displays content; the [game engine](game_rules.md) validates and applies effects.
+The seven pixelated 2.5D maps and building interactions live in versioned JSON content packs loaded by the Godot 4.x GDScript client. A pack contains logical map geometry, layered sprite assets, building footprints and entrances, scenes, choices, ledger effects, concept tags, English text keys, illustrative financial assumptions, and authored adaptive-event fallbacks. The Godot renderer displays content; the deterministic [game engine](game_rules.md) validates and applies effects. No chapter contains executable code.
+
+The project root is `game/project.godot`. Store shipped packs under `game/content/`, addressed in Godot as `res://content/`, and load them with `FileAccess` and `JSON`. Content IDs resolve through a validated local registry to approved textures, `PackedScene` files or resources. Never accept an arbitrary resource or script path from a chapter or remote event. Optional typed `Resource` wrappers may validate imported data, but no third-party plugin is needed and JSON remains the authoring contract.
 
 ## Required IDs and relationships
 
@@ -22,6 +24,8 @@ Each level map declares `projection: "angled_overhead"`, logical map bounds, `gr
 Each placed building specifies `buildingId`, logical position, `assetId`, `groundAnchor`, collision footprint, reachable `entranceNodeId`, screen-independent tap polygon, label key, and associated scene IDs. Asset metadata may provide separate base, roof, and foreground layers with depth anchors and an occlusion policy. Decorative height has no effect on movement unless an explicit elevated route is authored.
 
 The content validator checks that the spawn can reach every required entrance, footprints do not block the only repair route, interaction polygons resolve overlapping buildings sensibly, and each asset and English label exists. A repair pin attaches to the source building's entrance, not an arbitrary sprite corner.
+
+Translate this data into a `Node2D` world with `TileMapLayer` ground and a `CharacterBody2D` player. Registered building scenes contain sprites, collision shapes and an entrance `Area2D`; the area's building ID resolves the chapter when the player presses E. Use foot anchors and `y_sort_enabled` for depth, not sprite top edges. The same ID drives direct tap entry and accessible building-list entry. A locked chapter shows an authored prerequisite hint instead of executing an unrelated scene. Movement, doorway use and pause behavior are game systems, not scripts embedded in the map pack.
 
 ## Scene contract
 
@@ -69,7 +73,7 @@ Example, abbreviated and illustrative:
 }
 ```
 
-The effects referenced above are authored, validated data records. The scene JSON does not contain executable JavaScript. Financial values are integer paise and all rates/prices are labelled fictional assumptions.
+The effects referenced above are authored, validated data records. The scene JSON contains no executable GDScript, expressions to evaluate, or arbitrary resource paths. A trusted GDScript effect registry maps approved effect IDs to deterministic operations; unknown IDs reject the pack. Financial values are integer paise and all rates/prices are labelled fictional assumptions. Native visual novel controls emit `choice_selected(scene_id, choice_id)`; only the engine commits the resulting state.
 
 ## Level content inventory
 
@@ -104,3 +108,5 @@ Visual assets are referenced by IDs and have a text equivalent. The town uses gr
 ## Build-time validation
 
 The content build fails when an ID is missing, a dialogue key lacks its English text, a choice has no reachable next scene, a required building has no consequential interaction, a gate has no safe path, or a repair has no source and return checkpoint. A graph traversal checks cycles and unreachable nodes. A concept dependency check prevents untaught concepts in required dialogue or event eligibility. A financial validator checks that choices and rates stay within approved scenario bounds.
+
+Run these checks from the Godot project with a headless GDScript validation entry point before export. Also verify every registered `PackedScene` and asset imports, every required entrance is reachable with the actual collision shapes, and the same action opens the same chapter through keyboard, touch and the building list. Phase previews must run the integrated Godot game and check the newest level's content and all earlier completed levels.

@@ -22,6 +22,8 @@ flowchart TD
 
 Visual styling follows [design.md](design.md): a pixelated town in an angled overhead view, and a dedicated building scene with staged pixel characters, an interior background, and a prominent bottom dialogue panel. Financial text and choices render at readable native interface size.
 
+All screens are native Godot scenes in the project at `game/project.godot`. The world uses `Node2D`, `TileMapLayer`, `CharacterBody2D`, `AnimatedSprite2D`, `Camera2D` and foot-anchored Y sorting; HUD, chapter and journal live in `CanvasLayer`/`Control` UI. Interior artwork uses `TextureRect` and staged sprites, while dialogue and choices use `RichTextLabel`, containers and `Button` nodes. GDScript coordinates navigation and state; Windows, Android and web exports share the flow.
+
 | Screen | Required information and action |
 | --- | --- |
 | Setup | Optional fictional money context, goal, English narration/text preferences, anonymous class code if used. Explain that no real financial data is needed. |
@@ -39,7 +41,10 @@ Visual styling follows [design.md](design.md): a pixelated town in an angled ove
 
 The visual novel is the primary teaching experience. All building conversations, purchase decisions, bank explanations, unexpected expenses, and repair encounters use the chapter flow in [visual_novel_design.md](visual_novel_design.md). A receipt, chart, or calculator supports the narrative decision and returns to its dialogue and consequence.
 
-- One tap on a building opens its current relevant scene; do not require precise collision movement on a small screen. A brief optional avatar walk to its entrance can support the transition. A ground tap routes the avatar along walkable streets around building footprints.
+- WASD and arrows move the `CharacterBody2D` player through shared `InputMap` actions. Normalize diagonal input and use collision-aware movement. E opens the current building chapter when an entrance `Area2D` contains the player; when no doorway is in range, it does nothing except offer a helpful prompt.
+- One tap on a building or a building-list entry opens its current relevant scene without requiring precise walking. A brief optional avatar walk can support the transition. A ground tap follows authored walkable routes around building footprints. Touch directions and the Interact button call the same actions as keyboard controls.
+- Space/Enter advances dialogue or completes the current text reveal; 1/2/3 selects an available numbered choice. Esc closes the top object/journal overlay first, then returns from a chapter at a valid checkpoint. J toggles the journal. Touch Continue, choice and Back buttons use the same handlers.
+- Pause player movement and doorway interaction while a visual novel or modal owns focus. Consume each input once so advancing dialogue cannot also activate a focused choice. Debounce pending choice submissions until the engine returns the committed result.
 - Use a fixed angled overhead view with bounded camera pan and optional zoom. Keep entrance markers and building labels readable above sprites; split or fade foreground roofs and props when they obscure the player. A visible-target tap must not select a building behind it.
 - Buildings can be visited in different orders, but a prerequisite dialogue branch becomes available only after its earlier concept is taught. If locked, show a helpful lead to the relevant building.
 - Returning to a building opens its state-aware follow-up chapter. Preserve dialogue position, selected choice, and displayed consequence when a session is interrupted.
@@ -48,6 +53,19 @@ The visual novel is the primary teaching experience. All building conversations,
 - In a no-network state, show a small offline indicator; do not interrupt the story. Sync status belongs in settings, not every decision.
 - Hints explain the decision frame and options, not a command to pick the largest rupee balance.
 
+## InputMap and focus
+
+| Action | Keyboard | Touch or direct UI | Active context |
+| --- | --- | --- | --- |
+| `move_left/right/up/down` | A/D/W/S and matching arrows | Directional pad or authored ground route | World only; normalized movement with collision |
+| `interact` | E | Interact button; direct building tap uses the building ID | World entrance `Area2D` or accessible building list |
+| `dialogue_advance` | Space/Enter | Continue | Dialogue only; one beat or text reveal per event |
+| `choice_1/2/3` | 1/2/3 | Focusable numbered choice buttons | Available choices only; one committed decision |
+| `back` | Esc | Back | Top overlay first; valid chapter checkpoint next |
+| `journal` | J | Journal button | Opens ledger/history without financial effects |
+
+Use one input owner at a time: top modal, visual novel, then world. Native Godot focus navigation must reach dialogue controls and choices without sending arrows to world movement. A `choice_selected(scene_id, choice_id)` signal requests the deterministic engine result; the consequence screen receives a committed snapshot rather than applying the effects itself. Resolve IDs through approved local content and scene registrations, never arbitrary remote resource paths.
+
 ## Accessibility review
 
 Text can enlarge without clipping choices. Every map icon has a label and screen-reader name. Color is not the only sign of a completed, open, or repair building. Screen reader focus follows speaker, dialogue, options, then consequence. Review English map labels, choice order, and rupee amounts at large text sizes. All dialogue, captions, UI, and optional narration use English. See [localization_and_delivery.md](localization_and_delivery.md).
@@ -55,3 +73,5 @@ Text can enlarge without clipping choices. Every map icon has a label and screen
 ## Vertical-slice screen acceptance
 
 The first demo must let a learner complete the Level 1 grocery trip, inspect the ₹100 savings result, enter Level 2, reach the ₹1,000 default task earnings goal, encounter a Level 3 overspending event, follow a repair pin to the kirana decision, and return to Level 3 with recomputed values. No hidden developer controls should be needed during that path.
+
+After every phase, run the integrated Godot build: Phase 0 checks the foundation and starter chapter; Phases 1–7 each check the new complete level and regress earlier completed levels. Record actual preview evidence for keyboard movement, doorway and direct-tap entry, full visual novel interactions, journal, collision, correct depth ordering and movement pause. Test interruption and resume at the latest committed checkpoint; screenshots alone cannot establish playability.

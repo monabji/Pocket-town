@@ -16,7 +16,7 @@ Students practice money decisions in a safe Indian neighborhood simulation. They
 ## Required player experience
 
 1. Start the English experience, select an optional money context and a fictional goal, and set text/audio preferences. No real financial details are requested.
-2. Explore a pixelated 2.5D map with layered buildings, streets, and an animated avatar. Tap any building to transition into its full visual novel chapter with an illustrated background, expressive character portraits, dialogue, and branching decisions.
+2. Explore a pixelated 2.5D Godot map with layered buildings, streets, and an animated avatar. Move with WASD or arrows, press E at a doorway, or tap a building directly to enter its full visual novel chapter with an illustrated background, expressive character portraits, dialogue, and branching decisions. Touch controls provide the same actions.
 3. Make a consequential choice. Show rupees, time, access to money, and social implications before or after the choice as appropriate.
 4. See a clear consequence card, updated ledger, and a short explanation. Let the player compare an alternate path without receiving duplicate money.
 5. Advance after the level's money objective and behavioral gate are evaluated. A moderate unresolved habit may cause a later, personalized bottleneck; a severe eligible issue returns the player to repair it first.
@@ -41,16 +41,20 @@ The amounts are default fictional classroom values and scale together for altern
 
 - A level is a navigable pixelated 2.5D map with multiple buildings and at least one meaningful choice in each required building. Building entrances and labels remain usable despite visual overlap.
 - Every building interaction uses the visual novel chapter contract in [visual_novel_design.md](visual_novel_design.md): setup, dialogue or investigation, financial choice, visual consequence, reflection, and next story lead. Revisited buildings and repair scenes use state-aware follow-up chapters.
-- Map movement uses tap-to-move on authored walkable routes. A building tap opens its scene directly or after a brief optional walking transition; precise avatar positioning is never required to learn.
+- Build the client in Godot 4.x Standard using GDScript and the Compatibility renderer. The project entry is `game/project.godot`; Windows, Android and web exports share the same learning rules and JSON content.
+- Map movement uses normalized WASD/arrow input through `InputMap`, a `CharacterBody2D` with collision, and entrance `Area2D` interaction for E. Touch directional controls and authored tap-to-move routes use the same movement actions. A building tap or building-list selection opens its scene directly; precise avatar positioning is never required to learn.
+- Space/Enter advances a dialogue beat, 1/2/3 activates an available choice, Esc dismisses an overlay or safely returns, and J opens the journal. Map movement pauses during visual novels and modal overlays. One input event must never advance a beat and submit a choice simultaneously.
+- The town uses `Node2D`, `TileMapLayer`, `AnimatedSprite2D`, `Camera2D` and foot-anchored Y sorting. The visual novel uses a `CanvasLayer` and native `Control` UI with readable `RichTextLabel` text and focusable `Button` choices; no browser-specific rendering or input layer is required.
 - Characters and props render in the correct depth order. Foreground structures may fade or split into layers to keep the avatar and entrance markers visible. Visual novel choices, ledger, and consequences stay readable in a flat interface.
 - Every concept has a prerequisite, an active choice, a consequence, and a later transfer moment.
 - Gate decisions, balance math, and weight updates are deterministic and inspectable in a debug build.
+- Versioned JSON chapter packs are data only. A validated effect-ID registry maps choices to deterministic GDScript rules. Asset and chapter IDs resolve through a trusted local resource registry; remote data cannot execute scripts or load arbitrary resource paths.
 - At least five behavioral demerits persist across levels: overspending, cash concentration, risk mismanagement, saving inconsistency, and verification neglect. Context rules prevent penalizing necessary spending or an emergency buffer.
 - The event system can choose different eligible bottlenecks for players with the same rupee total but different decision histories. An authored fallback covers every required event type.
 - A repair loop must have a reachable solution, one mandatory bottleneck at a time, hints, and no repeat of the same resolved loop.
 - Save and resume work on a midrange Android device while offline. Sync is optional for gameplay.
 - All player-facing interface, dialogue, signage, captions, and optional narration use English. Content uses stable English text keys; there is no language selector or multilingual release workstream.
-- Phases 1–7 each add one complete playable level. Every phase, including the runnable foundation, ends with an actual game preview, checks of earlier completed levels, and recorded evidence before the phase is marked complete.
+- Phases 1–7 each add one complete playable level. Every phase, including the runnable foundation, ends with an actual integrated Godot game preview, keyboard/touch checks, regression of earlier completed levels, and recorded evidence before the phase is marked complete.
 - The facilitator can see aggregate reach, transfer, repair, and safety indicators, with no public ranking.
 
 ## Safety and educational constraints

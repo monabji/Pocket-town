@@ -1,81 +1,93 @@
 # Pocket Town Data Model
 
-## Storage principles
+## Godot storage contract
 
-The active branch is an event-sourced simulation with periodic snapshots. A choice event is immutable; a replay forks from an earlier snapshot and creates a new active branch. Store only fictional game state and minimal classroom identifiers. The server backs up progress and produces aggregates, while the local database remains sufficient to play offline.
+This is the target model for the Godot migration, not a claim that migrated saves or scenes already exist. GDScript typed classes and validated dictionaries describe an event-sourced financial simulation. The pure `RefCounted` engine consumes values rather than scene nodes. A choice event is immutable; replay forks a branch and recomputes from a source checkpoint with the same seed.
 
-All monetary values are integer paise. Each record includes `contentVersion` and a stable scenario seed so a run can be reproduced. Do not store real bank account numbers, Aadhaar, income, UPI PINs, OTPs, or real product holdings.
+`SaveManager` stores one versioned aggregate with `FileAccess` under `user://`. The optional service backs up pseudonymous progress and computes class aggregates; local files are sufficient for all seven levels. English is fixed. Store stable English text keys and accessibility settings, with no language preference state.
 
-English is fixed for all content and UI. Store stable English text keys in content; no learner language preference or translation-pack state exists. The shared display formatter renders integer paise consistently as rupees.
+All money uses integer paise. Never store real bank details, Aadhaar, UPI PINs, OTPs, actual household income or real holdings.
 
 ## Core entities
 
-| Entity | Key fields | Notes |
+| Entity | Key fields | Rules |
 | --- | --- | --- |
 | `Learner` | `learnerId`, `classId?`, `createdAt`, `selectedContext` | Random pseudonymous ID; no real name required. |
-| `Classroom` | `classId`, `classCodeHash`, `facilitatorId`, `contentVersion` | A class code joins sessions; never use the code as a learner identity. |
-| `Playthrough` | `playthroughId`, `learnerId`, `activeBranchId`, `contentVersion`, `scenarioSeed`, `currentLevelId` | One save can contain multiple comparison branches. |
-| `Branch` | `branchId`, `parentBranchId?`, `forkSnapshotId?`, `active`, `createdAt` | Exactly one active branch per playthrough. |
-| `DecisionEvent` | `eventId`, `branchId`, `sequence`, `sceneId`, `choiceId`, `effectIds`, `conceptIds`, `createdAt` | Append-only, idempotent by `eventId`. |
-| `LedgerEntry` | `entryId`, `decisionEventId`, `category`, `accountFrom?`, `accountTo?`, `amountPaise`, `fictionalTime` | Transfers balance; source category distinguishes earnings from interest. |
-| `Snapshot` | `snapshotId`, `branchId`, `afterSequence`, `accounts`, `weights`, `goalState`, `fictionalTime` | Deterministic checkpoint for fast resume and repair. |
-| `WeightEvidence` | `evidenceId`, `decisionEventId`, `weightKey`, `delta`, `conceptId`, `contextRuleId`, `resolvedBy?` | Explains every weight change and decay. |
-| `AdaptiveEvent` | `adaptiveEventId`, `targetWeight`, `templateId`, `sourceDecisionId`, `pausedCheckpoint`, `status`, `variantId` | `scheduled`, `active`, or `resolved`; at most one active mandatory event. |
-| `ConceptProgress` | `conceptId`, `taughtAtEventId`, `transferEventIds`, `latestResult` | Records exposure and later application, not a diagnosis. |
-| `PresentationResume` | `playthroughId`, `branchId`, `snapshotId`, `contentVersion`, `chapterId`, `sceneId`, `beatId`, `openObjectId?`, `committedDecisionEventId?` | Restores the visual novel only against its active branch and pinned content. Commit the choice, resulting snapshot, and post-choice beat atomically. Camera position and optional avatar position are local presentation state. |
-| `SyncCursor` | `deviceId`, `playthroughId`, `lastUploadedSequence`, `lastAcknowledgedEventId` | Supports offline batch retries. |
+| `Classroom` | `classId`, `classCodeHash`, `facilitatorId`, `contentVersion` | Class membership and access are distinct from learner identity. |
+| `Playthrough` | `playthroughId`, `activeBranchId`, `contentVersion`, `scenarioSeed`, `currentLevelId` | Pin the content version and maintain exactly one active branch. |
+| `Branch` | `branchId`, `parentBranchId?`, `forkSnapshotId?`, `createdAt` | Preserve previous branches for comparison, with no additional earnings. |
+| `DecisionEvent` | `eventId`, `branchId`, `sequence`, `sceneId`, `choiceId`, `effectIds`, `conceptIds` | Ordered, immutable and idempotent by event ID. |
+| `LedgerEntry` | `entryId`, `decisionEventId`, `category`, `accountFrom?`, `accountTo?`, `amountPaise`, `fictionalTimeTick` | Separate earned income, transfers, expenses, interest and market scenarios. |
+| `Snapshot` | `snapshotId`, `branchId`, `afterSequence`, `accounts`, `weights`, `goalState`, `fictionalTimeTick` | Deterministic engine result; a submitted cloud snapshot is not automatically trusted. |
+| `WeightEvidence` | `evidenceId`, `decisionEventId`, `weightKey`, `delta`, `conceptId`, `contextRuleId`, `resolvedBy?` | Explain each taught-context demerit or improvement. |
+| `AdaptiveEvent` | `adaptiveEventId`, `targetWeight`, `templateId`, `sourceDecisionId`, `pausedCheckpoint`, `status`, `variantId` | At most one active mandatory bottleneck; source must be on the active branch. |
+| `ConceptProgress` | `conceptId`, `taughtAtEventId`, `transferEventIds`, `latestResult` | Evidence of exposure/application, not a learner diagnosis. |
+| `PresentationResume` | `playthroughId`, `branchId`, `snapshotId`, `contentVersion`, `chapterId`, `sceneId`, `beatId`, `openObjectId?`, `committedDecisionEventId?` | Restore only against the active branch, snapshot and content version. |
+| `WorldPresentation` | `mapId`, `entranceId?`, `avatarPosition`, `cameraPosition`, `zoomStep` | Local presentation coordinates may use floats; these never enter money arithmetic. |
+| `SyncCursor` | `deviceId`, `playthroughId`, `lastUploadedSequence`, `lastAcknowledgedEventId` | Persist retry state inside the aggregate. |
+| `CommitManifest` | `schemaVersion`, `contentVersion`, `generation`, `activeBranchId`, `payloadHash` | Recovery metadata validates one complete aggregate generation. |
 
-## Example TypeScript state
+## Example typed GDScript snapshot
 
-```ts
-type MoneyPaise = number; // integer, validated at runtime
-type WeightKey =
-  | "overspending"
-  | "cash_concentration"
-  | "risk_mismanagement"
-  | "saving_inconsistency"
-  | "verification_neglect";
+```gdscript
+class_name GameSnapshot
+extends RefCounted
 
-interface Accounts {
-  personalCash: MoneyPaise;
-  allocatedExpenseMoney: MoneyPaise;
-  accessibleSavings: MoneyPaise;
-  timeBoundDeposit: MoneyPaise;
-  fictionalInvestmentValue: MoneyPaise;
-  protectedGoalFund: MoneyPaise;
+var snapshot_id: String = ""
+var branch_id: String = ""
+var content_version: String = ""
+var scenario_seed: String = ""
+var level_id: String = ""
+var fictional_time_tick: int = 0
+
+# Integer paise; each account has a distinct ownership/access purpose.
+var accounts: Dictionary[String, int] = {
+    "personal_cash": 0,
+    "allocated_expense_money": 0,
+    "accessible_savings": 0,
+    "time_bound_deposit": 0,
+    "fictional_investment_value": 0,
+    "protected_goal_fund": 0,
 }
-
-interface GameSnapshot {
-  snapshotId: string;
-  contentVersion: string;
-  scenarioSeed: string;
-  levelId: string;
-  sceneId: string;
-  fictionalTimeTick: number;
-  accounts: Accounts;
-  weights: Record<WeightKey, number>;
-  taughtConceptIds: string[];
-  activeAdaptiveEventId?: string;
+var weights: Dictionary[String, int] = {
+    "overspending": 0,
+    "cash_concentration": 0,
+    "risk_mismanagement": 0,
+    "saving_inconsistency": 0,
+    "verification_neglect": 0,
 }
+var taught_concept_ids: Array[String] = []
+var active_adaptive_event_id: String = ""
 ```
 
-Use runtime validation to reject noninteger money, negative balances where prohibited, out-of-range weights, unknown IDs, and unsupported content versions. The authoritative computation is in [game_rules.md](game_rules.md).
+Pin a stable Godot release supporting these typed dictionaries. JSON field names follow the schemas in `contracts/saves/`; explicit serialization maps them to internal GDScript properties. Typed Resources under `game/resources/` describe authored content; save data uses validated plain values rather than serializing arbitrary Nodes or script instances. Classes and validators live under `game/scripts/engine/` and `game/scripts/content/`.
 
-Before restoring a visual novel, verify that its resume record matches the active branch, snapshot, and pinned content version. A repair branch switch replaces the active resume record with the recomputed return checkpoint in the same local transaction that activates the new branch. Do not reuse an old branch's dialogue position or apply a committed choice again after interruption.
+## Numeric validation and deterministic arithmetic
 
-## API surface
+GDScript `int` is signed 64-bit, but decoded JSON numbers may be floats. Reject fractional, non-finite, unknown, negative where forbidden or out-of-bound values **before** converting to `int`. Monetary/time/rate schemas must stay within the exact JSON integer range, with tighter application limits; check every arithmetic product against int64 overflow. Do not convert money to float for interest calculations.
 
-| Endpoint | Purpose |
-| --- | --- |
-| `POST /v1/classes/join` | Exchange a class code for a pseudonymous learner session. |
-| `GET /v1/content/manifest` | Return available signed English content versions. |
-| `POST /v1/playthroughs/:id/events/batch` | Idempotently upload local decision and snapshot metadata. |
-| `GET /v1/playthroughs/:id` | Restore a compatible saved branch. |
-| `POST /v1/events/propose` | Request a bounded event variant for a selector-created envelope. |
-| `GET /v1/classes/:id/aggregates` | Return facilitator progress without detailed personal choices. |
+Use integer division and an explicit floor/rounding policy for paise. Rates are integer basis points; time advances through authored fictional days/ticks. Renderer frame time, elapsed wall-clock time and camera coordinates cannot change financial results. Validate weights in `[0,100]`, known account/effect IDs, ordered prerequisites, ownership, seed and pinned content version. See [game_rules.md](game_rules.md).
 
-The API does not accept client-provided balances as unquestioned truth. It verifies sequence and content version or recomputes the branch using the shared engine. Sync uploads can be retried safely. Conflicting branches from two devices remain distinct until the learner selects which to continue.
+The schema is defined in JSON Schema, enforced by GDScript validators and tested by headless golden fixtures in `game/tests/`. Any optional server implementation must produce the same snapshots/hashes from those fixtures, regardless of its implementation language.
+
+## Aggregate save and recovery
+
+A save aggregate contains playthrough metadata, branches, ordered events, snapshots, evidence, adaptive events, presentation resume, accessibility settings, sync cursor/queue and the commit manifest. `SaveManager` writes a temporary candidate, flushes/closes it, rereads and validates its hash/schema/generation, preserves a previous valid backup and activates the candidate. Recovery checks current, temporary and backup files and selects a fully validated compatible generation.
+
+This single-aggregate protocol prevents a separately persisted dialogue beat from getting ahead of its financial decision. It is not a database transaction guarantee. Test interruption and storage failure at each step, including web export persistent storage behavior. If a write fails, keep the prior active in-memory/persisted branch and offer a retry; do not silently claim progress was saved.
+
+A repair activates its new branch, recomputed snapshot and return beat together. Before opening a chapter, verify `PresentationResume` matches that branch/snapshot/content version. A stale comparison branch cannot control the visible scene. A committed choice resumes at its consequence beat, never at an actionable duplicate choice.
+
+## Network surface
+
+Godot `SyncClient` uses optional HTTPS `HTTPRequest` calls for class join, content manifests, event upload, compatible restore and facilitator aggregates. `AdaptiveEventClient` requests a bounded variant for a rule-approved envelope. See [api_contract.md](api_contract.md). Application deadlines, cancellation and response validation prevent a late reply from affecting an obsolete branch.
+
+Upload events idempotently, and verify sequence/content version on the service. Conflicting device branches remain separate until the learner chooses which to continue; balances are never summed. No network request is necessary to complete a level.
 
 ## Retention and access
 
-Define retention with the NGO partner before pilot deployment. The default design minimizes data: anonymous class membership, simulated choices, and aggregate learning metrics. A facilitator sees completion and support needs, not a public per-student demerit score or private financial answers. Provide a way to delete a learner's cloud save by pseudonymous ID. Keep provider keys and detailed AI logs server-side with limited access and a documented retention period.
+Agree retention with the NGO partner before a pilot. Keep pseudonymous class membership, fictional progress and aggregate learning metrics minimal. The facilitator Godot `Control` scene exposes completion and support needs, not a public demerit ranking or private financial answers. Support cloud deletion by pseudonymous learner ID. Provider secrets and restricted AI logs stay server-side.
+
+## Verification
+
+Use headless GDScript tests for schema restoration, integer precision boundaries, rejected fractional money, deterministic replay, save recovery and branch-scoped presentation resume. At every phase, exercise actual Godot save/resume in the integrated native preview and web/device targets when available; record evidence as required by [phases.md](phases.md).

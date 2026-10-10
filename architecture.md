@@ -1,117 +1,132 @@
 # Pocket Town Architecture
 
-## Goal and boundaries
+## Target and implementation status
 
-The app is a React Native and Expo game with a pixelated 2.5D map, a branching visual novel renderer, and a deterministic financial simulation. The town uses a rectangular logical ground grid with an angled overhead view, visible building fronts and roofs, layered pixel sprites, shadows, and depth sorting. The visual direction is defined in [design.md](design.md). It must work without connectivity. A Node.js and TypeScript service adds pseudonymous cloud save, content distribution, facilitator aggregates, and optional AI event personalization. The client must never depend on the AI service to finish a level.
+Pocket Town will be a Godot 4.x stable project using the standard GDScript build and Compatibility renderer. This document specifies the migration target; it does not claim that the Godot game is already implemented. Pin the selected stable editor and export templates together before development.
 
-The engine computes all money, gates, weight changes, and replay results. The AI service may only choose an approved event variant and bounded narrative parameters. See [game_rules.md](game_rules.md) and [ai_event_engine.md](ai_event_engine.md).
-
-The game has one fixed content language: English. There is no language selector, translation pack, or right-to-left layout. Content IDs resolve to English strings; display currency consistently as rupees using the shared formatter.
+The game uses a **2D scene tree to create the pixelated 2.5D look**: an angled overhead rectangular ground plane, visible roof and building fronts, layered sprites, shadows, and sorting by the ground contact point. The experience switches to a dedicated visual novel inside every building. Financial learning, English readability, offline play and safe retry remain central. See [design.md](design.md), [visual_novel_design.md](visual_novel_design.md) and [game_rules.md](game_rules.md).
 
 ## System diagram
 
 ```mermaid
 flowchart LR
-    P[Player] --> UI[React Native map and visual novel]
-    UI --> E[Deterministic game engine]
-    UI --> C[Versioned local content pack]
-    E --> L[Local save and event log]
-    C --> E
-    L --> S[Sync queue]
-    S <--> API[Node TypeScript API]
-    API <--> DB[(PostgreSQL)]
-    API --> A[Bounded AI event service]
-    A --> V[Schema and safety validator]
-    V --> API
-    DB --> F[Facilitator aggregates]
-    API --> F
+    P[Player] --> W[Godot world and visual novel scenes]
+    W --> G[GameSession autoload]
+    G --> E[Pure RefCounted FinancialEngine]
+    G --> C[ContentRepository: JSON and Resources]
+    G --> S[SaveManager: versioned local aggregate]
+    S --> Q[Persistent optional sync queue]
+    Q <--> H[SyncClient HTTPRequest]
+    G --> A[AdaptiveEventClient HTTPRequest]
+    H <--> API[Optional HTTPS service]
+    A <--> API
+    API --> V[Server proposal validator and AI adapter]
+    API --> DB[(Optional persistent backing store)]
+    API --> F[Godot facilitator Control scene]
 ```
 
-## Recommended repository layout
+All seven maps, complete English chapters, deterministic rules and authored adaptive events are bundled. Network services are optional and never prevent a level from finishing.
+
+## Canonical repository layout
 
 ```text
-apps/
-  mobile/                 Expo app, map UI, visual novel UI, local persistence
-  api/                    Node.js/TypeScript API and optional AI adapter
-  facilitator/            Minimal web dashboard or API-backed classroom view
-packages/
-  engine/                 Pure TypeScript ledger, rules, gates, replay, tests
-  content-schema/         JSON Schema, types, content validator
-  content/                Seven maps, English text, authored fallback events
-  shared/                 API contracts and stable IDs
+game/
+  project.godot
+  scenes/
+    main/                   Bootstrap and shell
+    world/                  Level maps, terrain and Camera2D
+    player/                 CharacterBody2D player
+    buildings/              Entrances and interaction areas
+    visual_novel/            Chapter stage and financial object views
+    ui/                     HUD, journal, settings and facilitator Control scene
+  scripts/
+    autoload/               GameSession, SaveManager, ContentRepository,
+                            SceneRouter, AudioManager
+    engine/                 Pure RefCounted financial rules and event selection
+    content/                JSON/Resource validation and text lookup
+    world/                  Movement, interaction and depth ordering
+    visual_novel/            Beat runner, branch presentation and focus
+    ui/                     Control scripts and accessible input
+    network/                Optional SyncClient and AdaptiveEventClient
+  resources/                Typed Resource definitions and reusable settings
+  content/                  Versioned English maps, chapters and event packs
+  assets/                   Original pixel art, fonts, audio and atlases
+  tests/                    Headless GDScript fixtures and scene integration tests
+contracts/
+  content/                  JSON Schemas and golden content fixtures
+  saves/                    Aggregate schema, migrations and replay fixtures
+  api/                      HTTPS request/response schemas and examples
+services/                   Optional server; implementation language is not fixed
 ```
 
-## Client modules
+## Runtime modules and ownership
 
-| Module | Responsibility |
+| Component | Responsibility |
 | --- | --- |
-| Map renderer | Project logical map coordinates into the angled overhead view; draw ground, buildings, sprites and foreground layers with correct depth; manage camera, hit areas, walkable routes and repair pins. Navigation never changes money by itself. |
-| Visual novel renderer | Open a full chapter on every building selection: illustrated background, character portraits and expressions, speaker dialogue, branching choices, financial objects/overlays, consequence beats, reflection and replay. Resolve follow-up chapters from saved story state and content JSON. |
-| Game engine | Apply choices, maintain integer-paise ledger, advance fictional time, calculate interest and asset scenarios, update weights, evaluate gates, and recompute branches. It is a pure function over versioned state and choice data. |
-| Content loader | Validate signed/versioned content packs, resolve stable English text keys, and keep the active save bound to a compatible content version. |
-| Local store | Persist the current snapshot, append-only decision log, accessibility options, and pending sync work. Expo SQLite is a reasonable starting adapter. |
-| Sync worker | Upload pseudonymous event batches when online, retry idempotently, and never block offline play. |
+| `GameSession` autoload | Own the active playthrough, invoke engine operations, coordinate a validated choice commit, emit state changes and expose immutable presentation data. |
+| `FinancialEngine extends RefCounted` | Compute ledger, paise balances, fictional time, interest, weights, gates and replay from supplied state/content. No scene tree, input, network, filesystem, wall clock or frame-rate dependency. |
+| `ContentRepository` autoload | Load JSON and typed Resources, validate schemas/IDs and bounds, resolve English text keys, and pin a compatible content version. Never execute content as script. |
+| `SaveManager` autoload | Write one versioned save aggregate using `FileAccess` under `user://`; validate temporary and backup generations before activating a save. |
+| `SceneRouter` autoload | Switch map/chapter scenes, pass stable IDs, preserve return points, and release old scene signal connections and input focus. |
+| `AudioManager` autoload | Manage buses, volume, captions and optional English narration independently of financial state. |
+| World scenes | Present map geometry, movement, collisions, entrance prompts, repair pins and camera. Movement alone cannot earn or spend money. |
+| Visual novel scenes | Run authored beats and branching choices; show background, expressive characters, receipts, consequences, reflection and replay. Submit each confirmed choice through `GameSession`. |
+| `SyncClient` / `AdaptiveEventClient` | Optional HTTPS `HTTPRequest` adapters with application deadlines, cancellation, schema validation and authored fallback. No provider secret is stored in the game. |
+| Facilitator `Control` scene | Show minimal class progress aggregates with an authorized facilitator session; shared-device local progress remains available offline. |
 
-## 2.5D map rendering and navigation
+## Map rendering, movement and controls
 
-Keep simulation and map navigation coordinates separate from screen pixels. The supplied references establish an angled overhead view with straight streets and a rectangular ground grid. For logical ground coordinates `(u, v)`, tile footprint dimensions `(groundTileWidth, groundTileDepth)`, and any authored visual elevation offset, start with:
+Use `TileMapLayer` terrain, `Sprite2D`/`AnimatedSprite2D` artwork, `Node2D` scene composition, `Camera2D`, and authored collision footprints. Pixel art uses nearest filtering and integer-aligned pixel presentation where practical. Keep UI text at a readable interface scale. Ground coordinate `(u, v)` maps to an angled overhead image using authored tile width/depth and visual elevation offsets; artwork supplies apparent height.
 
-```text
-screenX = u * groundTileWidth
-screenY = v * groundTileDepth - authoredElevationOffset
-```
+Enable `y_sort_enabled` on appropriate world containers. Set sprite origins at foot/ground anchors, split roofs or foreground pieces where needed, and use deliberate z layers for terrain, shadows, actors, foreground and entrance indicators. Test occlusion rather than relying on a single sort value for an entire tall building.
 
-Camera offset and scale transform these projected positions for display. The initial maps use a single walkable ground plane; visual building height comes from pixel sprite artwork. A future elevated route needs explicit height and navigation metadata before it can affect movement. Use `projection: "angled_overhead"` and the visual rules in [design.md](design.md).
+The avatar is `CharacterBody2D`; `_physics_process(delta)` reads `Input.get_vector("move_left", "move_right", "move_up", "move_down")`, applies speed and calls `move_and_slide()`. Collision and scene navigation use world coordinates. An `Area2D` entrance identifies the nearest reachable building and exposes its chapter ID. Interactive objects cannot activate through blocked walls.
 
-- **Draw order:** ground tiles and shadows first; buildings, props, and characters next, sorted by their ground contact or foot position; authored foreground pieces next; labels, entrance markers, and repair pins above the scene. Split large buildings into base and foreground/roof layers where one depth key would hide a character incorrectly.
-- **Anchors:** every sprite has a ground anchor, visual bounds, and asset ID. Buildings also have a collision footprint, entrance node, and tap polygon. The tap polygon follows the usable building area rather than only its rectangular texture bounds.
-- **Movement:** a walkable grid or navigation graph defines legal routes. Convert a ground tap through the inverse projection, find a reachable node, and route the avatar around building footprints. A building tap resolves to its entrance and scene ID. The scene can open immediately with an optional short transition so movement does not delay learning.
-- **Occlusion:** fade or hide authored foreground pieces when needed, and draw an avatar outline or marker when behind a building. Hit testing uses visible interactive layers in depth order; it must not open a building behind the intended target.
-- **Camera:** use a fixed angled overhead view, bounded pan, optional discrete zoom steps, and an initial framing that exposes the starting home and next relevant building. Preserve pixel edges with nearest-neighbor sampling and keep text at native interface size. Persist the camera locally for resume; it is not part of financial state.
-- **Performance:** use sprite atlases where appropriate, cull offscreen tiles and props, avoid rerendering the entire map on every avatar frame, and load assets by level. Verify the renderer with representative scene density on the target Android device before selecting the final drawing library.
+| InputMap action | Desktop binding | Mobile equivalent |
+| --- | --- | --- |
+| `move_up/down/left/right` | WASD and arrow keys | Directional `TouchScreenButton` controls invoking the same actions |
+| `interact` | E | Interact button at a nearby entrance |
+| `dialogue_next` | Enter or Space | Continue button/tap |
+| `choice_1` through available choice actions | Number keys | Focusable choice buttons |
+| `back` | Escape | Back/close button |
+| `journal` | J | Journal button |
 
-The map renderer consumes versioned geometry and asset metadata from [content_authoring.md](content_authoring.md). It emits navigation and building-selection actions to the UI; only a confirmed scene choice can invoke a money transaction. Building selection transitions from the town view to a dedicated visual novel chapter screen. Its chapter runner resolves the current background, characters, dialogue beat, choices, and scene objects; the renderer presents a readable interface over the illustrated location. Story progression and financial calculations stay in their respective state and engine layers. See [visual_novel_design.md](visual_novel_design.md).
+Building activation always opens the full visual novel chapter, with mouse/touch selection also supported. Keyboard focus transfers into the chapter's `Control` UI; world movement is suspended while dialogue, a choice, a receipt or a modal is active. Connect signals on entry and disconnect/release on exit. Do not let one Enter press both select a choice and skip its consequence. Number keys only choose currently visible valid choices. Closing returns to the correct map entrance and active branch checkpoint.
 
-## Server modules
+Physics ticks animate movement; **fictional financial time advances only through validated authored decisions**. Leaving the app open cannot accrue interest.
 
-- **API:** authentication through a random learner ID and class code, save backup, content manifest, event request, and facilitator aggregate endpoints. No real bank login or financial account connection exists.
-- **PostgreSQL:** durable learner progress and versioned decisions. A Firebase adapter is possible later, but use one backing store for the first implementation.
-- **AI adapter:** receives a small, pseudonymous state summary and a rule-selected event envelope. It returns structured event text/variant IDs, never a changed balance or gate. The API validates it and uses an authored fallback when unavailable.
-- **Facilitator view:** shows map completion, concept transfer, bottleneck resolution and offline completion counts. It does not expose individual financial choices to peers.
+## Financial arithmetic and contracts
 
-## Choice transaction
+GDScript `int` provides signed 64-bit arithmetic. Use integer paise, bounded integer basis-point rates and explicit fictional days/ticks. Validate multiplication operands before multiplying; use deterministic integer division with an explicit rounding policy. Never pass financial calculations through float interpolation or pixel coordinates. Display rupees only in UI formatting.
 
-1. The renderer passes a stable `sceneId`, `choiceId`, content version, and current snapshot ID to the engine.
-2. The engine validates prerequisites and applies an atomic ledger transaction and any fictional time advance.
-3. It derives weight evidence, concept exposure, the next scene, and any gate result. In one local transaction, write the immutable decision event, resulting snapshot, and branch-scoped presentation resume record at the post-choice consequence beat. Repeated taps and interrupted sessions must not apply that choice again.
-4. The UI renders a consequence card with the exact numerical change and a plain-language explanation.
-5. If the event selector finds an eligible bottleneck, the client first loads an authored local variant. When online, the server may return a validated personalized variant for the same event envelope.
+JSON may decode numbers as floating-point values. Validate integral representation, non-negative balances, application maxima, and the JSON exact-integer range before converting to `int`; then restore typed model objects. Use a tighter content/account bound and overflow-safe arithmetic so rate/time multiplication also fits int64. JSON Schemas and GDScript validators define the same rules; headless golden fixtures establish server/client conformance without relying on a particular server language.
 
-The client rejects duplicate choice IDs against the same snapshot. Server sync is idempotent using a device-generated event ID. Replaying an earlier choice creates a new branch from the earlier snapshot and recomputes all downstream numbers; it never grants rewards twice.
+## Choice, save and repair commit
 
-Activate a repair branch and its recomputed snapshot/return beat atomically. Resume records must match the active branch, snapshot, and pinned content version; stale records from a comparison branch cannot control the visible chapter. See `PresentationResume` in [data_model.md](data_model.md).
+1. A chapter submits stable scene/choice IDs, pinned content version and expected snapshot/branch IDs to `GameSession`.
+2. The pure engine validates prerequisites, ownership and available resources, then produces a complete candidate decision log, ledger, snapshot, gate and post-choice presentation beat.
+3. Validate the entire candidate. Repeated confirmation against the same snapshot is idempotent. A failed replay leaves the active save untouched.
+4. Serialize **one aggregate** containing active branch, events, snapshots, pending sync items and branch-scoped resume state. Save to a temporary file, flush/close, reread and verify schema/hash/generation, preserve the prior valid backup, and activate the candidate.
+5. Update visible session state only after successful persistence; emit the committed result and show exact financial changes and the explanatory consequence.
 
-## Interfaces and deployment decisions
+The aggregate includes a commit manifest with schema/content versions, generation, active branch and checksum. Recovery examines current, temporary and backup candidates and chooses a fully valid compatible generation. An optional last-good pointer is recovery metadata, not independent financial truth. Test interruptions at each filesystem step on native and web exports. This is an application-level temp/backup protocol, not a database transaction or an unconditional power-loss guarantee; retain a known valid backup and report recoverable failures clearly.
 
-- Use TypeScript types generated from JSON Schema for scenes, choices, save snapshots, and event proposals.
-- Pin a content pack version to a playthrough. Migrate saves only through an explicit, tested migration; do not silently reinterpret old decisions.
-- Store currency as integer paise and fictional time as explicit ticks or dates. Display rupees only at the UI boundary.
-- Keep all reference rates and prices in versioned content, labelled illustrative. The engine applies formulas but does not fetch market prices or current tax rules.
-- The API and AI adapter are optional for play. The mobile app bundles complete authored scenes, fallback bottlenecks, and the deterministic engine.
-- Keep secrets server-side. No provider key or model prompt belongs in the mobile bundle.
+Repair forks from the exact source checkpoint, replaces the old decision evidence and recomputes downstream effects with the same seed. Archive the previous branch for comparison. Activate the new branch, snapshot and return beat in the same aggregate; stale resume records cannot reopen an old branch or grant a reward again.
 
-## Failure behavior
+## Optional service boundary
+
+Contracted services provide pseudonymous class joining, cloud backup, content manifests, facilitator aggregates and bounded event personalization. The server language is an implementation choice. A PostgreSQL backing store is optional. The service must validate/recompute event sequences using the same rules and golden fixtures; never accept submitted balances as authoritative.
+
+`HTTPRequest` clients use HTTPS, application timeouts, bounded payloads, request IDs, and `request_completed` handling. Cancel requests when their target branch/scene becomes obsolete. Browser exports require the service to support the deployed origin's CORS policy. Offline play and authored events remain the default fallback. Provider keys, service administrative credentials and model execution stay server-side.
+
+## Failure and verification gates
 
 | Failure | Behavior |
 | --- | --- |
-| No network | Complete all seven levels using bundled content and local saves; queue anonymous sync. |
-| AI timeout or invalid response | Use the rule-selected authored event for the same demerit and severity. |
-| Interrupted save | Recover the last committed snapshot and replay the pending choice once. |
-| Content version mismatch | Continue on the pinned pack or run an explicit migration; never mix rules from two versions. |
-| Cloud conflict across devices | Preserve both branches, choose a clear active branch with the learner, and never merge two ledgers arithmetically. |
+| No network or service deadline | Continue all chapters locally; queue eligible sync and use authored adaptive events. |
+| Interrupted or invalid save | Restore a validated compatible aggregate/backup; do not apply a committed choice twice. |
+| Content mismatch | Continue the pinned pack or use an explicit tested migration. |
+| Cross-device conflict | Preserve separate branches and choose the active playthrough; never add ledgers together. |
+| Invalid or stale AI proposal | Discard it and display the approved event matching the current rule envelope. |
 
-## Design review gates
-
-The vertical slice must prove offline play, deterministic replay, a later bottleneck from earlier evidence, and exact return to the source choice. Full release additionally requires the seven-map English content pack, facilitator aggregates, and the test gates in [quality_and_learning.md](quality_and_learning.md).
-
-Every implementation phase in [phases.md](phases.md) must conclude with a running, integrated game preview covering its new playable content and regression of earlier levels. Phase 0 previews the runnable foundation; Phases 1–7 each preview one additional complete level. Record the build, device, demonstrated path, results, and observed issues before marking the phase complete.
+Every phase in [phases.md](phases.md) ends with an actual integrated Godot preview and evidence: native desktop keyboard play, web export where available, and device/touch checks when available. Exercise map → building → visual novel → consequences → gate, with regression of completed levels and applicable replay/offline/resume checks. Phase 0 establishes the runnable foundation; Phases 1–7 add complete levels. Record the commit, Godot/export version, target, screenshots or recording, results and unresolved issues before declaring a phase complete. A plan or editor screenshot alone is not a playable preview.

@@ -15,7 +15,7 @@ Static lessons and fixed scripts can teach definitions without testing whether a
 | **Element** | **Design** |
 | --- | --- |
 | Audience | Grades 11 and 12, with English content and adaptable fictional money contexts suited to NGO delivery in India |
-| Format | pixelated 2.5D map in React Native and Expo; layered buildings and animated sprites; tap a building to enter a branching visual novel |
+| Format | Godot 4.x Standard with GDScript and the Compatibility renderer; pixelated 2.5D maps made from layered 2D sprites; WASD/arrows to explore, E at a doorway or a direct building tap to enter a visual novel |
 | Main learning experience | Every building opens a visual novel chapter with a location background, expressive characters, dialogue, consequential choices, and visible financial outcomes |
 | Story goal | Prepare a personal next step goal and help friends build a Money Wall for the neighborhood fair |
 | Learning ladder | Each new concept requires an earlier skill, is used in a building choice, and is tested again in a different later situation |
@@ -26,6 +26,8 @@ Static lessons and fixed scripts can teach definitions without testing whether a
 ## Map presentation
 
 Each of the seven levels uses a fixed angled overhead view with visible building fronts and roofs, connected streets, and clear entrance markers. Layered ground, shadows, buildings, characters, and foreground props give the town depth. Tap a building to open its current visual novel; a short avatar walk may support the transition but never becomes a barrier to the learning scene. Tap-to-move exploration uses authored walkable routes. Building labels and repair pins remain readable when the avatar passes behind a structure. Camera pan and optional zoom help explore the map, while the visual novel, choices, and ledger use a flat, readable interface. The pixel art, character staging, palette, and dialogue panels follow [design.md](design.md), based on the supplied visual references.
+
+The executable client is the Godot project at `game/project.godot`. The town is a `Node2D` scene with `TileMapLayer` ground, a `CharacterBody2D` player, `AnimatedSprite2D` movement, building collision shapes and entrance `Area2D` nodes, and a bounded `Camera2D`. Normalize diagonal movement and sort world sprites by their ground anchors using `y_sort_enabled`; roof height never changes collision position. WASD and arrows move, E interacts with a nearby doorway, and direct taps or the building list provide the same chapter access without requiring precise walking. Space/Enter advances dialogue, 1/2/3 select choices, Esc closes the current overlay or returns safely, and J opens the journal. Touch controls use the same `InputMap` actions. Player movement pauses whenever the visual novel or a modal has input focus.
 
 ## Visual novel learning experience
 
@@ -365,14 +367,16 @@ The strongest learning test is transfer: a player who budgets correctly at the k
 
 | **Layer** | **Responsibility** |
 | --- | --- |
-| React Native and Expo client | pixelated 2.5D map renderer with layered sprites, depth sorting, building hit areas and tap-to-move routes; visual novel, HUD, local state, offline replay |
-| JSON content engine | Level scenes as branching graphs with prerequisite concepts, newly taught concepts, later transfer scenes, choice effects, pass criteria, and English text keys |
-| Deterministic game engine | Exact money arithmetic, time steps, asset values, interest assumptions, weight rules with decay, two gates, and branch recalculation |
+| Godot 4.x Standard client | GDScript with Compatibility rendering; layered 2D town, normalized movement and collisions, entrance areas, native visual novel Controls, HUD, local saves and offline replay; Windows, Android and web exports |
+| JSON content engine | Data-only level graphs under `game/content/` (Godot `res://content/`), stable IDs, prerequisites, English text keys, choice effects and authored event fallbacks; no executable chapter scripts |
+| Deterministic GDScript game engine | Exact integer-paise arithmetic, time steps, asset values, interest assumptions, weight rules with decay, two gates, branch recalculation and validated effect-ID dispatch |
 | Hybrid event generator | Rules set event type and severity from demerits and portfolio; AI personalizes bounded narrative and parameters |
-| Node and TypeScript API | Pseudonymous authentication, cloud save, demerit history, event logs, and facilitator progress on PostgreSQL or Firebase |
+| Optional HTTPS service | Stable JSON contracts for pseudonymous sessions, cloud saves, approved AI events and facilitator aggregates; no client stack dependency and no network requirement for authored gameplay |
 | Offline and safety layer | Cached authored events, validated model output, content versioning, and sync after connectivity returns |
 
 Build a runnable foundation in Phase 0, then add one complete level per phase in Phases 1–7. Preview the actual integrated game after every phase, including its new content and the previously completed levels. Phase 3 completes the first cross-map repair path: a Map 1 money pass with overspending evidence, Map 2 task earnings, a Map 3 event, a return to Map 1, and resumption in Map 3. Later phases add the remaining levels using the same JSON and simulation contracts. The production system must work with its offline authored fallback when an AI request fails. Preview evidence and the release gates are specified in [phases.md](phases.md).
+
+Every preview runs the current Godot build rather than a mockup. Validate keyboard and touch chapter entry, pause and resume, the newest complete level, and earlier levels on the same integrated project. The visual novel lives in a `CanvasLayer` with native `Control` containers, an interior `TextureRect`, staged character sprites, `RichTextLabel` dialogue and `Button` choices. Its `choice_selected(scene_id, choice_id)` signal requests a deterministic result; the UI displays that result without applying money itself. SaveManager commits the decision, snapshot, active branch, content version and post-choice resume beat as one validated aggregate, with temporary-file checks and a prior valid backup; recovery must not duplicate a payment. Filesystem operations are not assumed to provide database transaction guarantees.
 
 ## Planned testing methodology
 
@@ -382,7 +386,7 @@ Build a runnable foundation in Phase 0, then add one complete level per phase in
 | Bot simulations | Reckless spender, cash-heavy long-horizon learner, and concentrated-risk learner receive distinct eligible events; each can repair and complete every map. |
 | Path divergence | Different histories at the same money gate lead to meaningfully different event types or dialogue while equivalent choices remain reproducible for debugging. |
 | Event safety | Generated English text cannot change engine numbers or exceed bounds; financial claims, age context, and clarity pass review. |
-| Usability and performance | Mid-range Android and iOS playtests check navigation, save and resume, offline play, load time, and whether students understand why an event occurred. |
+| Usability and performance | Godot Windows and midrange Android playtests check navigation, save/resume, offline play, load time, and whether students understand why an event occurred. Optional web exports require separate browser controls, caching and persistence checks. |
 | Concept ladder | Each of the eight named concepts appears in an active choice, a visible consequence, and at least one later transfer scene; no bottleneck uses an untaught concept. |
 | Pilot learning | Later transfer scenes show concept-score improvement without simply repeating the original question. |
 

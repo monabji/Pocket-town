@@ -1,27 +1,40 @@
 # Pocket Town API Contract
 
-The API backs up pseudonymous progress and optionally personalizes a rule-approved adaptive event. It is not required for offline gameplay. All requests and responses are versioned JSON over HTTPS; the shared TypeScript schemas should generate client and server types.
+## Godot client and optional service
+
+This contract specifies the Godot migration target. The game runs offline with bundled English content and authored adaptive events; the optional service backs up pseudonymous progress, provides classroom aggregates and personalizes an approved event. The server implementation language and backing store are not fixed.
+
+Godot `SyncClient` and `AdaptiveEventClient` under `game/scripts/network/` use `HTTPRequest` for versioned JSON over HTTPS. The facilitator is a Godot `Control` scene under `game/scenes/ui/` consuming aggregate endpoints. JSON Schemas live in `contracts/api/`; GDScript validation and language-independent golden fixtures enforce them on both sides. Do not assume generated language-specific client types are the contract.
 
 ## Common rules
 
-- Every write has a client-generated `requestId` or event ID for idempotency.
-- Every playthrough request includes `contentVersion`. A mismatch returns a structured version error; the client continues on its pinned local pack.
-- Money values use integer paise. The server never trusts a client-supplied balance without checking the event sequence with the shared engine.
-- Responses include a stable error code and a safe user-facing message key, not provider traces or prompts.
-- Authenticate learners with a pseudonymous session token. A class code joins a classroom but is not an authentication secret.
+- Each write uses a client-generated `requestId` or event ID for idempotency.
+- Playthrough requests include pinned `contentVersion`, branch and sequence context. Version mismatch keeps the local pack active.
+- Money is integer paise. Validate decoded numeric values as integral and bounded before converting to GDScript `int`; all JSON integers stay in the exact representation range, with tighter application limits.
+- Never accept submitted balances without validating/recomputing their ordered decision sequence using the same deterministic fixtures as the Godot engine.
+- Learners use pseudonymous session tokens. Class codes establish membership and are not sufficient authentication for every later request.
+- Errors expose stable codes and approved English message keys, not provider traces, prompts or credentials.
+- English is fixed; no language or locale request parameter exists. UI formatting converts paise to rupees only for presentation.
+- Model provider keys and administrative secrets remain server-side. The client contains no AI provider credential.
 
-English is fixed by the application contract. Endpoints have no language or locale parameter, and text keys resolve only to approved English strings. User-facing amounts use the shared rupee formatter.
+## Godot request lifecycle
+
+Create/request through a controlled network adapter, connect `request_completed` once, and check both transport result and HTTP status before parsing. Set bounded payload size and an explicit application deadline. The adapter emits typed success/failure signals; the financial engine never waits on a Node or network response.
+
+Associate each adaptive request with active branch/snapshot/content version and request ID. Cancel obsolete requests on scene/branch changes and discard late replies even if transport cancellation races. Sync requests persist retry/idempotency metadata in the versioned save aggregate. Failure queues appropriate work without blocking local play. Never busy-wait in `_process` or `_physics_process`.
+
+Web exports need HTTPS deployment and service CORS support for the deployed origin. Verify native desktop, web and device behavior when available. Do not assume a native networking/storage test proves browser export behavior.
 
 ## Endpoints
 
 | Endpoint | Request | Response |
 | --- | --- | --- |
-| `POST /v1/classes/join` | `classCode`, `deviceId`, `requestId` | `learnerId`, short-lived session token, allowed content manifest. |
-| `GET /v1/content/manifest` | Current content version | Available English pack versions, hashes, minimum app version. |
-| `POST /v1/playthroughs/:id/events/batch` | Ordered choice events with IDs, branch ID, sequence, content version, optional snapshot hash | Highest acknowledged sequence and any conflict/version error. Duplicate IDs return the original acknowledgement. |
-| `GET /v1/playthroughs/:id` | Playthrough ID and token | Branch metadata and compatible restore events/snapshot; never another learner's save. |
-| `POST /v1/events/propose` | Rule selector envelope, evidence IDs, request ID | Validated variant/template IDs and parameter IDs or an authored fallback indicator. No balance or gate fields. |
-| `GET /v1/classes/:id/aggregates` | Facilitator token, content version filter | Counts for reach, transfer, repair, safety, and offline completion; no raw demerit vector. |
+| `POST /v1/classes/join` | `classCode`, `deviceId`, `requestId` | `learnerId`, short-lived session token and allowed content manifest. |
+| `GET /v1/content/manifest` | Current content version | English pack versions, hashes, minimum game version and contract version. |
+| `POST /v1/playthroughs/:id/events/batch` | Ordered events, IDs, branch, sequence, content version and optional snapshot hash | Highest acknowledged sequence or structured conflict/version error. Duplicates return the original acknowledgement. |
+| `GET /v1/playthroughs/:id` | Playthrough ID and session | Compatible branch metadata and restore events/snapshot; never another learner's save. |
+| `POST /v1/events/propose` | Rule envelope, evidence IDs and request ID | Approved variant/template and parameter IDs or authored fallback indicator. No balance/gate fields. |
+| `GET /v1/classes/:id/aggregates` | Authorized facilitator session and optional content version filter | Completion, concept transfer, repair, safety and offline counts; no raw demerit vector. |
 
 ## Example sync request
 
@@ -43,7 +56,7 @@ English is fixed by the application contract. Endpoints have no language or loca
 }
 ```
 
-The server acknowledges the event only if sequence and content IDs are valid. The snapshot hash is diagnostic; the server's recomputation is authoritative for cloud backup. The local app continues offline if sync fails.
+The service checks sequence and content IDs before acknowledgement. The hash is diagnostic; validated event recomputation determines accepted cloud state. Local Godot play continues during sync failure. A server may use its own conforming implementation or a controlled headless rule runner, but must pass the same golden fixtures.
 
 ## Example event proposal request
 
@@ -61,16 +74,19 @@ The server acknowledges the event only if sequence and content IDs are valid. Th
 }
 ```
 
-The response contains only a chosen approved template/variant and parameter IDs, an explanation ID, and a validation result. Invalid or timed-out AI output produces the authored template chosen by the rules. See [ai_event_engine.md](ai_event_engine.md).
+Response fields contain only approved template/variant, bounded parameter and explanation IDs with validation status. Approved English content resolves them. Invalid, late or timed-out output uses the rule-selected authored event. See [ai_event_engine.md](ai_event_engine.md).
 
-## Errors to handle explicitly
+## Errors and fallback
 
-| Code | Client behavior |
+| Code | Godot behavior |
 | --- | --- |
-| `NETWORK_UNAVAILABLE` | Queue the write and continue locally. |
-| `CONTENT_VERSION_MISMATCH` | Keep using the pinned pack; offer an explicit migration only when available. |
-| `SEQUENCE_CONFLICT` | Preserve both branches and ask which playthrough to continue; do not add balances together. |
-| `INVALID_EVENT_PROPOSAL` | Render the authored fallback; do not expose raw provider output. |
-| `SESSION_EXPIRED` | Renew the pseudonymous session when online; local play remains available. |
+| `NETWORK_UNAVAILABLE` | Queue eligible sync and continue from local content/save. |
+| `CONTENT_VERSION_MISMATCH` | Use the pinned pack; offer an explicit tested migration when available. |
+| `SEQUENCE_CONFLICT` | Preserve both branches and ask which playthrough to continue; never add balances. |
+| `INVALID_EVENT_PROPOSAL` | Display the authored fallback; never expose raw provider output. |
+| `SESSION_EXPIRED` | Renew the pseudonymous session online while local play remains available. |
+| `REQUEST_TIMEOUT` | End waiting UI, retain queued sync where relevant and use local fallback for adaptation. |
 
-Before implementation, freeze JSON Schemas for these messages and add contract tests that run against both the mobile client types and the server handlers.
+## Contract verification
+
+Freeze schemas before integrating a service. Run GDScript headless fixtures for valid/invalid messages, numeric bounds, timeout handling, duplicate upload, branch conflicts, stale adaptive replies and offline fallback. Server tests consume the same fixtures. Every phase adding network behavior must show it working or falling back in the actual integrated Godot preview, with native/web/device coverage when available and recorded evidence under [phases.md](phases.md).

@@ -4,13 +4,21 @@ Pocket Town's main teaching experience is a visual novel. The 2.5D town connects
 
 ## Building entry and screen composition
 
-1. Tap a building or select it from the accessible building list.
+1. Move with WASD/arrows and press E inside the doorway interaction area, tap a building directly, or select it from the accessible building list. Touch controls use the same actions.
 2. Resolve the chapter appropriate to the current level, prerequisites, earlier choices, and active repair. A brief entrance transition can be skipped.
 3. Open a dedicated visual novel screen with an illustrated interior or location background, character portraits or sprites, expressions, a speaker name, and a dialogue box.
 4. Present story beats at the player's pace. At decision points, show two or three plausible choices and any known cost, time, or condition needed to understand them.
 5. Show the chosen outcome in the scene, then explain the exact ledger change with a readable financial object or overlay. End with reflection and a lead to another building or follow-up chapter.
 
 The visual novel screen follows [design.md](design.md): a pixel interior with the player staged in the foreground left, an NPC near a counter or desk farther right, and a prominent bottom dialogue panel inspired by the final supplied image. Use larger staged sprites for expressions and gestures, with optional portraits when helpful. The screen keeps character and story context visible while the player chooses. Text and choices have sufficient contrast and scale independently of the artwork. Financial receipts, passbooks, payslips, charts, and goal boards are scene objects that can open a readable overlay. After inspecting them, the learner returns to the same dialogue beat.
+
+## Godot scene and input contract
+
+Implement the chapter as a native Godot `CanvasLayer` containing a full-rect `Control` layout. Use a `TextureRect` for the interior, a staged `Node2D`/`AnimatedSprite2D` character layer, and native containers for the speaker label, `RichTextLabel` dialogue, financial object and focusable `Button` choices. Anchor the bottom dialogue panel and let containers wrap and grow for enlarged English text. The artwork remains pixel crisp while interface text uses readable font sizing. The visual novel overlays the paused world; it does not turn the chapter into another walking map.
+
+Register dialogue and choice actions in the project `InputMap`: Space/Enter advance or finish revealing the current text, 1/2/3 choose the corresponding visible option, Esc dismisses the current object overlay before safely leaving the chapter, and J opens the journal without applying a financial action. Touch Continue, choice and Back buttons call the same action handlers. Consume each input once; an Enter press routed to dialogue must not also trigger a focused button or submit the next choice. Disable movement and entrance interaction while any chapter, journal or modal owns focus.
+
+The chapter controller emits `choice_selected(scene_id, choice_id)` to the authoritative deterministic GDScript engine. It waits for a validated result before presenting the consequence and must ignore repeated submissions while a decision is pending. Text animations, portraits and object overlays never mutate the ledger. Scene IDs and asset IDs resolve from a trusted local registry to authored content under `res://content/`; JSON chapters cannot run scripts or specify arbitrary resources.
 
 ## Chapter structure
 
@@ -58,11 +66,15 @@ The AI can personalize approved character lines and event variants inside this c
 
 Every building chapter declares a chapter ID, entry conditions, background asset, character IDs and expression assets, ordered dialogue beats, stable English text keys, scene objects, choices, consequence branches, reflection, and exit leads. Alternative text covers essential visual information. Optional English narration references the same English dialogue beats; captions preserve their full meaning.
 
-Save the playthrough, active branch, snapshot, chapter, scene, current beat, committed decision event, any open object overlay, and content version. Commit a decision, its resulting snapshot, and the post-choice resume beat in one local transaction. Restoring a chapter must match the active branch and display a previously committed consequence without applying its transaction again. A repair replaces the active resume record with the recomputed later checkpoint; it cannot restore dialogue from the old comparison branch. Revisits resolve to a follow-up, reflection, or repair chapter rather than automatically replaying the first visit.
+Save the playthrough, active branch, snapshot, chapter, scene, current beat, committed decision event, any open object overlay, and content version. Commit a decision, its resulting snapshot, and the post-choice resume beat in one validated save aggregate through SaveManager's temporary-file and backup recovery protocol. Restoring a chapter must match the active branch and display a previously committed consequence without applying its transaction again. A repair replaces the active resume record with the recomputed later checkpoint; it cannot restore dialogue from the old comparison branch. Revisits resolve to a follow-up, reflection, or repair chapter rather than automatically replaying the first visit.
+
+Godot persists that aggregate to `user://` using a temporary file and validated replacement, including an explicit save schema version. A resume record is valid only when its active branch, snapshot and content version agree. Reconstruct the chapter from its data and checkpoint; do not serialize live scene nodes or restore an old branch's dialogue state. Preview native and exported builds after each phase with interruptions at dialogue, choice and consequence beats.
 
 ## Acceptance criteria
 
 - Every building opens the visual novel presentation and has a story reason for its interaction.
+- Keyboard doorway entry, direct tap and building-list entry open the same chapter. Space/Enter and touch Continue advance exactly one beat; 1/2/3 and touch choices commit exactly once; Esc closes the active overlay safely.
+- No map motion occurs during chapter or modal interaction. Focus remains visible on native Controls, and enlarged text never covers the choice buttons.
 - Required teaching chapters include a meaningful choice, a visible consequence, a clear financial explanation, and a later lead or transfer.
 - Returning to a building reflects prior decisions and the current story state.
 - Repair chapters return to the exact earlier decision and resume the later narrative correctly.

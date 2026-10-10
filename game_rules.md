@@ -2,6 +2,14 @@
 
 This is the deterministic contract for the engine. Values below are starting tuning assumptions. Content authors can vary fictional prices and tasks inside validated bounds, but may not change the meaning of a gate or ledger category.
 
+## Godot implementation contract
+
+Implement these rules in a typed GDScript `FinancialEngine` extending `RefCounted`, under `game/scripts/engine/`. Keep it independent of the scene tree, frame timing, input events, animation, and networking. `GameSession` sends validated commands and receives a candidate state; the UI displays the result only after SaveManager commits the decision, snapshot, branch metadata, and consequence beat together. Movement through a `CharacterBody2D` does not change money or advance financial time.
+
+Use GDScript 64-bit `int` for paise and integer rate/time inputs. Validate safe bounded values and intermediate products; use explicit integer quotient/remainder rounding rather than floating-point ledger math. Imported JSON numbers must be validated as whole values within the agreed range before conversion to `int`. For simple interest, multiply the bounded principal, rate in basis points, and authored days, then divide by `10000 * 365` using the agreed rounding rule. Compound periods apply the same explicit rounding rule at each specified period.
+
+The financial scenario seed is stored in the save. Use a dedicated seeded `RandomNumberGenerator` only where a scenario requires it; world animation and decorative randomness must never consume the financial random sequence. Replaying a branch uses the same authored assumptions and scenario seed. Run engine and content fixtures through a headless Godot `SceneTree` test runner, including both safe full-game routes, repairs, and duplicate-command handling.
+
 ## Money and time
 
 - Store every amount as integer paise. A displayed ₹100 is `10000` paise. Never use floating point for ledger arithmetic.
